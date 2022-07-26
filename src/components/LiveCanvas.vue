@@ -23,7 +23,7 @@ let zoomMax: number = 50;
 onMounted(() => {
   board = document.getElementById('board') as HTMLDivElement;
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  let ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
+  let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
   if (!ctx) return;
 
