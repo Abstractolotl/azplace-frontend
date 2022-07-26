@@ -28,7 +28,6 @@ onMounted(() => {
 
   ctx.moveTo(0, 0);
   ctx.fillRect(100, 200, 128, 128);
-  ctx.stroke();
 })
 
 const handleZoom = (event: any) => {
