@@ -19,6 +19,7 @@ let canvasHeight: number = store.getters.canvasHeight;
 
 let zoomLevel: number = 1;
 let zoomMax: number = 50;
+let zoomMultiplier: number = -0.01;
 
 onMounted(() => {
   board = document.getElementById('board') as HTMLDivElement;
@@ -34,7 +35,7 @@ onMounted(() => {
 const handleZoom = (event: any) => {
   board = document.getElementById('board') as HTMLDivElement;
 
-  zoomLevel += event.deltaY * -0.01;
+  zoomLevel += event.deltaY * zoomMultiplier;
   zoomLevel = Math.min(Math.max(1, zoomLevel), zoomMax);
 
   board.style.transform = `scale(${zoomLevel}, ${zoomLevel})`;
