@@ -4,6 +4,7 @@
     <div id="board">
       <canvas id="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
