@@ -9,8 +9,9 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useStore, Store } from "vuex";
+import { storeData } from '@/types';
 
-const store: Store<any> = useStore();
+const store: Store<storeData> = useStore();
 
 let board;
 let canvasWidth: number = store.getters.canvasWidth;
