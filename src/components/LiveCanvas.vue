@@ -8,16 +8,16 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { useStore } from "vuex";
+import { useStore, Store } from "vuex";
 
-const store = useStore();
+const store: Store<any> = useStore();
 
 let board;
-let boardWrapper = document.getElementById('board-wrapper');
 let canvasWidth: number = store.getters.canvasWidth;
 let canvasHeight: number = store.getters.canvasHeight;
 
-let zoomLevel = 1;
+let zoomLevel: number = 1;
+let zoomMax: number = 50;
 
 onMounted(() => {
   board = document.getElementById('board') as HTMLDivElement;
@@ -35,11 +35,10 @@ const handleZoom = (event: any) => {
   board = document.getElementById('board') as HTMLDivElement;
 
   zoomLevel += event.deltaY * -0.01;
-  zoomLevel = Math.min(Math.max(.125, zoomLevel), 4);
+  zoomLevel = Math.min(Math.max(1, zoomLevel), zoomMax);
 
   board.style.transform = `scale(${zoomLevel}, ${zoomLevel})`;
 }
-
 </script>
 
 <style scoped>
