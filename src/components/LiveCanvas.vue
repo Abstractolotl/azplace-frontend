@@ -1,17 +1,17 @@
 <template>
-  <div id="board-wrapper" @wheel="handleZoom($event)">
-    <div id="board">
-      <canvas id="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <div>
+        <panZoom>
+            <img src="https://picsum.photos/300">
+        </panZoom>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
+import type { StoreData } from "@/types";
 import { onMounted } from "vue";
 import { useStore, Store } from "vuex";
-import { storeData } from '@/types';
 
-const store: Store<storeData> = useStore();
+const store: Store<StoreData> = useStore();
 
 let board;
 let canvasWidth: number = store.getters.canvasWidth;
