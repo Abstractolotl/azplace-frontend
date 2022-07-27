@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import HelloWorld from "@/components/LiveCanvas.vue";
+import LiveCanvas from "@/components/LiveCanvas.vue";
+import ColorSelectionBar from '@/components/ColorSelectionBar.vue';
 </script>
 
 <template>
   <main>
-    <HelloWorld />
+    <LiveCanvas />
+    <ColorSelectionBar />
   </main>
 </template>
