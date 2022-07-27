@@ -36,11 +36,8 @@ onMounted(() => {
 
   ctx.fillRect(100, 200, 128, 128);
 
-  //window.test = penis;
-
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
-      //console.log(getColor(j+1,i))
       ctx.fillStyle = colors[getColor(i+1, j, smiley)];
       ctx.fillRect(i, j, 1, 1);
     }
@@ -49,10 +46,9 @@ onMounted(() => {
   panzoom(board);
 })
 
-function getColor(x : number, y : number, arr:Uint8Array) {
-  return arr[y * 4 + x - 1]
+const getColor = (x: number, y: number, arr: Uint8Array) => {
+  return arr[y * 4 + x - 1];
 }
-
 </script>
 
 <style scoped>
