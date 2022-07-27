@@ -11,18 +11,13 @@
 import type { StoreData } from "@/types";
 import { onMounted } from "vue";
 import { useStore, Store } from "vuex";
-const store: Store<StoreData> = useStore();
-
 import panzoom from "panzoom";
 
+const store: Store<StoreData> = useStore();
 
 let board;
 let canvasWidth: number = store.getters.canvasWidth;
 let canvasHeight: number = store.getters.canvasHeight;
-
-let zoomLevel: number = 1;
-let zoomMax: number = 150;
-let zoomMultiplier: number = -0.01;
 
 onMounted(() => {
   board = document.getElementById('board') as HTMLDivElement;
@@ -34,10 +29,7 @@ onMounted(() => {
   ctx.moveTo(0, 0);
   ctx.fillRect(100, 200, 128, 128);
 
-  var element = document.getElementById('board') as HTMLDivElement
-
-  panzoom(element);
-
+  panzoom(board);
 })
 
 </script>
