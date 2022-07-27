@@ -18,7 +18,6 @@ export const store: Store<any> = createStore({
     mutations: {
         SET_SELECTED_COLOR: (state, color) => {
             state.selectedColor = color;
-            console.log(state.selectedColor)
         }
     },
     actions: {
