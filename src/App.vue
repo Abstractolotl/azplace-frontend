@@ -5,7 +5,9 @@ import config from './config.json';
 
 axios.get(config.API_GET_BOARD_INFO)
   .then((res) => {
-    console.log(res)
+    console.log(res);
+  }).catch((err) => {
+    console.log(err)
   })
 </script>
 
