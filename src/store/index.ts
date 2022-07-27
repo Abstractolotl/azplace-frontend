@@ -4,8 +4,8 @@ export const store: Store<any> = createStore({
     state: function() {
         return {
             canvas: {
-                width: 16,
-                height: 16,
+                width: 4,
+                height: 4,
             }
         }
     },
