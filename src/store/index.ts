@@ -7,13 +7,28 @@ export const store: Store<any> = createStore({
                 width: 4,
                 height: 4,
             },
+            loggedIn: false,
             colors: [],
-            selectedColor: ''
+            selectedColor: '',
+            user: {
+                username: '',
+                avatarURL: '',
+                email: '',
+                stats: {
+                    pixelsPlaced: 0,
+                    colorsUsed: 0
+                },
+                language: 'de',
+                defaultColor: '',
+                darkMode: true
+            }
         }
     },
     getters: {
         canvasWidth: state => state.canvas.width,
-        canvasHeight: state => state.canvas.height
+        canvasHeight: state => state.canvas.height,
+        user: state => state.user,
+        loggedIn: state => state.loggedIn,
     },
     mutations: {
         SET_SELECTED_COLOR: (state, color) => {
