@@ -11,20 +11,15 @@
 import type { StoreData } from "@/types";
 import { onMounted } from "vue";
 import { useStore, Store } from "vuex";
-const store: Store<StoreData> = useStore();
-
 import panzoom from "panzoom";
 
 const arr = Uint8Array.from("1111511511115555");
 
+const store: Store<StoreData> = useStore();
 
 let board;
 let canvasWidth: number = store.getters.canvasWidth;
 let canvasHeight: number = store.getters.canvasHeight;
-
-let zoomLevel: number = 1;
-let zoomMax: number = 150;
-let zoomMultiplier: number = -0.01;
 
 let colors = ["#FF0000", "#3333CC", "#00FF00", "#FFFF00", "#FF0066", "#FF9933", "#9900CC", "#00FFFF"]
 
@@ -47,12 +42,8 @@ onMounted(() => {
       ctx.fillRect(i, j, 1, 1);
     }
   }
-  //console.log(arr[3])
 
-  var element = document.getElementById('board') as HTMLDivElement
-
-  panzoom(element);
-
+  panzoom(board);
 })
 
 function getColor(x : number, y : number) {
