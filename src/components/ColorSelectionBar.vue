@@ -39,8 +39,6 @@ const addSelectedColorClass = (event: Event): void => {
 </script>
 
 <style scoped lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
-
 .sidebar {
   font-family: 'Open Sans', sans-serif;
   height: 100%;
