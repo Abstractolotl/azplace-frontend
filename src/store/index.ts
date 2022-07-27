@@ -6,7 +6,8 @@ export const store: Store<any> = createStore({
             canvas: {
                 width: 4,
                 height: 4,
-            }
+            },
+            colors: []
         }
     },
     getters: {

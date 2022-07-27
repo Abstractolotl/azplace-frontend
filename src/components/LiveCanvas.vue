@@ -63,6 +63,5 @@ function getColor(x : number, y : number, arr:Uint8Array) {
   image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
   image-rendering: pixelated;                 /* Awesome future-browsers       */
   -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
-
 }
 </style>
