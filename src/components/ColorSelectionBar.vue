@@ -1,7 +1,7 @@
 <template>
   <div id="mySidebar" class="sidebar">
     <a href="javascript:void(0)" class="closebtn" @click="closeNav()">×</a>
-    <div class="color" v-for="color in mockColors" :style="`background-color: ${color};`" @click="store.dispatch('setSelectedColor', color)">
+    <div class="color" v-for="color in mockColors" :style="`background-color: ${color};`" @click="store.dispatch('setSelectedColor', color); addSelectedColorClass($event)">
       <span class="color-text">
         {{ color }}
       </span>
@@ -26,6 +26,16 @@ const closeNav = () => {
 }
 
 const mockColors: string[] = ["#fff", "#aaa", "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff"];
+
+const addSelectedColorClass = (event: Event): void => {
+  document.querySelectorAll('.selectedColor').forEach((element) => {
+    element.classList.remove('selectedColor');
+  });
+
+  if (!event.currentTarget) return;
+
+  event.currentTarget.classList.add('selectedColor');
+}
 </script>
 
 <style scoped lang="scss">
@@ -113,6 +123,10 @@ const mockColors: string[] = ["#fff", "#aaa", "#ff0000", "#00ff00", "#0000ff", "
   margin: 15px;
   font-size: 25px;
   text-align: center;
+}
+
+.selectedColor {
+  box-shadow: -2px -2px 0 white, 2px 2px 0 white, 2px -2px 0 white, -2px 2px 0 white;
 }
 
 .color-text {
