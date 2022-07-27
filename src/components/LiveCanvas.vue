@@ -8,9 +8,10 @@
 </template>
 
 <script setup lang="ts">
-import type { StoreData } from "@/types";
-import { onMounted } from "vue";
-import { useStore, Store } from "vuex";
+//@ts-nocheck
+import type {StoreData} from "@/types";
+import {onMounted} from "vue";
+import {Store, useStore} from "vuex";
 import panzoom from "panzoom";
 
 const enis = Uint8Array.from("2552255225525555");
@@ -40,7 +41,7 @@ onMounted(() => {
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       //console.log(getColor(j+1,i))
-      ctx.fillStyle = colors[getColor(i+1, j,smiley)];
+      ctx.fillStyle = colors[getColor(i+1, j, smiley)];
       ctx.fillRect(i, j, 1, 1);
     }
   }
@@ -49,8 +50,7 @@ onMounted(() => {
 })
 
 function getColor(x : number, y : number, arr:Uint8Array) {
-  let color = arr[y * 4 + x -1]
-  return  color
+  return arr[y * 4 + x - 1]
 }
 
 </script>
