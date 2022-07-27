@@ -7,11 +7,23 @@ export const store: Store<any> = createStore({
                 width: 4,
                 height: 4,
             },
-            colors: []
+            colors: [],
+            selectedColor: ''
         }
     },
     getters: {
         canvasWidth: state => state.canvas.width,
         canvasHeight: state => state.canvas.height
+    },
+    mutations: {
+        SET_SELECTED_COLOR: (state, color) => {
+            state.selectedColor = color;
+            console.log(state.selectedColor)
+        }
+    },
+    actions: {
+        setSelectedColor(context, color) {
+            context.commit('SET_SELECTED_COLOR', color);
+        }
     }
 });

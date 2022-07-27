@@ -1,7 +1,7 @@
 <template>
   <div id="mySidebar" class="sidebar">
     <a href="javascript:void(0)" class="closebtn" @click="closeNav()">×</a>
-    <div class="color" v-for="color in mockColors" :style="`background-color: ${color};`">
+    <div class="color" v-for="color in mockColors" :style="`background-color: ${color};`" @click="store.dispatch('setSelectedColor', color)">
       <span class="color-text">
         {{ color }}
       </span>
@@ -13,6 +13,10 @@
 
 <script setup lang="ts">
 //@ts-nocheck
+import { useStore } from "vuex";
+
+const store = useStore();
+
 const openNav = () => {
   document.getElementById("mySidebar").style.width = "250px";
 }
