@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import LiveCanvas from "@/components/LiveCanvas.vue";
-import ColorSelectionBar from '@/components/ColorSelectionBar.vue';
+import Sidebar from '@/components/Sidebar.vue';
 import UserProfile from '@/components/UserProfile.vue';
 </script>
 
 <template>
-  <main>
-    <UserProfile />
+    <Sidebar />
     <LiveCanvas />
-    <ColorSelectionBar />
-  </main>
 </template>
