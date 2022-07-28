@@ -2,14 +2,18 @@
 import { RouterView } from 'vue-router'
 import axios from 'axios';
 import config from './config.json';
-/*
-axios.get(config.API_GET_BOARD_INFO)
+import {useStore} from "vuex";
+
+const store = useStore();
+
+axios.get(config.API_BASE_URL + `/board/7/info`)
   .then((res) => {
-    console.log(res);
+    store.state.canvas.width = res.data.width;
+    store.state.canvas.height = res.data.height;
+    store.state.canvas.colors = res.data.colorPalette.hexColors;
   }).catch((err) => {
     console.log(err)
   })
-  */
 </script>
 
 <template>

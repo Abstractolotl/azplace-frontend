@@ -29,13 +29,14 @@ function loadBoard(data: Uint8Array) {
 
     let ctx = canvas.value.getContext("2d") as CanvasRenderingContext2D;
 
-    for (let i = 0; i < 4; i++) {
+    setTimeout(() => {
+      for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-            ctx.fillStyle = store.state.canvas.colors[getColor(i+1, j, data)].toString();
-            ctx.fillRect(i, j, 1, 1);
+          ctx.fillStyle = store.state.canvas.colors[getColor(i+1, j, data)].toString();
+          ctx.fillRect(i, j, 1, 1);
         }
-    }
-
+      }
+    }, 200)
 }
 
 function selectPixel(x:number, y:number) {
