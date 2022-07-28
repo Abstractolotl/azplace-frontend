@@ -1,10 +1,7 @@
 <template>
-
-  <div id="board-wrapper">
     <div id="board">
-      <canvas id="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <canvas id="canvas" :width="canvasWidth" :height="canvasHeight" @mousemove="getMousePos($event)"></canvas>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -22,6 +19,7 @@ const ring = Uint8Array.from("4444455445544444");
 const store: Store<StoreData> = useStore();
 
 let board;
+let canvas;
 let canvasWidth: number = store.getters.canvasWidth;
 let canvasHeight: number = store.getters.canvasHeight;
 
@@ -29,35 +27,47 @@ let colors = ["#FF0000", "#3333CC", "#00FF00", "#FFFF00", "#FF0066", "#FF9933", 
 
 onMounted(() => {
   board = document.getElementById('board') as HTMLDivElement;
-  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+  canvas = document.getElementById('canvas') as HTMLCanvasElement;
   let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
   if (!ctx) return;
 
-  ctx.fillRect(100, 200, 128, 128);
-
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
-      ctx.fillStyle = colors[getColor(i+1, j, smiley)];
+      ctx.fillStyle = colors[getColor(i + 1, j, karo)];
       ctx.fillRect(i, j, 1, 1);
     }
   }
 
-  panzoom(board);
+  panzoom(board).zoomTo(-70, -30, 10);
 })
 
 const getColor = (x: number, y: number, arr: Uint8Array) => {
   return arr[y * 4 + x - 1];
 }
+
+const getMousePos = (evt) => {
+  const rect = canvas.getBoundingClientRect();
+  let x = Math.floor(((evt.clientX - rect.left) / (rect.right - rect.left)) * canvas.width)
+  let y = Math.floor(((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height)
+  console.log("x:",x);
+  console.log("y:",y);
+  return {
+    x: ((evt.clientX - rect.left) / (rect.right - rect.left)) * canvas.width,
+    y: ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height,
+  };
+};
+
 </script>
 
 <style scoped>
 #canvas {
   background-color: #fff;
-  image-rendering: optimizeSpeed;             /* Older versions of FF          */
-  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
-  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
-  image-rendering: pixelated;                 /* Awesome future-browsers       */
-  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+  image-rendering: optimizeSpeed; /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
+  image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated; /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+  transform: scale(10, 10);
 }
 </style>
