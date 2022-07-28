@@ -1,4 +1,4 @@
-import type { Canvas, StoreData } from "@/types";
+import type { StoreData } from "@/types";
 import { createStore, Store } from "vuex";
 
 export const store: Store<StoreData> = createStore({
@@ -7,11 +7,10 @@ export const store: Store<StoreData> = createStore({
             canvas: {
                 width: 4,
                 height: 4,
-                colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"]
+                colors: []
             },
             selectedColorIndex: 0,
             loggedIn: false,
-            colors: [],
             selectedColor: '',
             user: {
                 username: '',
@@ -21,7 +20,7 @@ export const store: Store<StoreData> = createStore({
                     pixelsPlaced: 0,
                     colorsUsed: 0
                 },
-                language: 'de',
+                language: navigator.language || 'en',
                 defaultColor: '',
                 darkMode: true
             }
