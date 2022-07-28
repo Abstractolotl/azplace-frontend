@@ -1,6 +1,11 @@
 export interface StoreData {
-    canvas: {
-        width: number;
-        height: number;
-    };
+    canvas: Canvas
+    selectedColorIndex: number,
+
+}
+
+export interface Canvas {
+    width: number;
+    height: number;
+    colors: Array<String>
 }

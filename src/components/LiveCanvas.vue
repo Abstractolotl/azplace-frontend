@@ -1,49 +1,57 @@
 <template>
-
-  <div id="board-wrapper">
-    <div id="board">
-      <canvas id="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+  <div class="board-wrapper">
+    <div ref="selector" class="selector"></div>
+    <div ref="board" class="board">
+        <canvas ref="canvas"></canvas>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-//@ts-nocheck
 import type {StoreData} from "@/types";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import {Store, useStore} from "vuex";
 import panzoom from "panzoom";
 
+const store: Store<StoreData> = useStore();
+const canvas = ref<HTMLCanvasElement>();
+const board = ref<HTMLElement>();
+const selector = ref<HTMLElement>();
+
+//Mock data
 const enis = Uint8Array.from("2552255225525555");
 const smiley = Uint8Array.from("7007000070070770");
 const karo = Uint8Array.from("1313313113133131");
 const ring = Uint8Array.from("4444455445544444");
 
-const store: Store<StoreData> = useStore();
+function loadBoard(data: Uint8Array) {
+    if (!canvas.value) return;
+    
+    let ctx = canvas.value.getContext("2d") as CanvasRenderingContext2D;
 
-let board;
-let canvasWidth: number = store.getters.canvasWidth;
-let canvasHeight: number = store.getters.canvasHeight;
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            ctx.fillStyle = store.state.canvas.colors[getColor(i+1, j, data)].toString();
+            ctx.fillRect(i, j, 1, 1);
+        }
+    }
 
-let colors = ["#FF0000", "#3333CC", "#00FF00", "#FFFF00", "#FF0066", "#FF9933", "#9900CC", "#00FFFF"]
+}
+
+function selectPixel(x:number, y:number) {
+    if(!selector.value) return;
+    selector.value.style.left = x + "px";
+    selector.value.style.top = y + "px";
+}
 
 onMounted(() => {
-  board = document.getElementById('board') as HTMLDivElement;
-  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    if (!board.value) return;
 
-  if (!ctx) return;
+    panzoom(board.value);
+    loadBoard(karo);
 
-  ctx.fillRect(100, 200, 128, 128);
 
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      ctx.fillStyle = colors[getColor(i+1, j, smiley)];
-      ctx.fillRect(i, j, 1, 1);
-    }
-  }
-
-  panzoom(board);
+    selectPixel(200, 150);
 })
 
 const getColor = (x: number, y: number, arr: Uint8Array) => {
@@ -52,12 +60,35 @@ const getColor = (x: number, y: number, arr: Uint8Array) => {
 </script>
 
 <style scoped>
-#canvas {
-  background-color: #fff;
-  image-rendering: optimizeSpeed;             /* Older versions of FF          */
-  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
-  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
-  image-rendering: pixelated;                 /* Awesome future-browsers       */
-  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+
+.board-wrapper {
+    height: 100%;
+    width: 100%;
+    background-color: lightgray;
+    overflow: hidden;
+    
+    position: relative;
+}
+
+.selector {
+    
+    position: absolute;
+    top: 100px;
+    left: 125px;
+
+    width: 50px;
+    height: 50px;;
+    background-color: red;
+    z-index: 100;
+}
+
+canvas {
+    z-index: 100;
+    background-color: #fff;
+    image-rendering: optimizeSpeed;             /* Older versions of FF          */
+    image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+    image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+    image-rendering: pixelated;                 /* Awesome future-browsers       */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
 }
 </style>
