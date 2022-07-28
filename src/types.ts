@@ -5,7 +5,7 @@ export interface StoreData {
 }
 
 export interface Canvas {
-    width: number;
-    height: number;
+    width: number | null;
+    height: number | null;
     colors: Array<String>
 }
