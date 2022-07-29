@@ -1,77 +1,166 @@
 <template>
-  <div class="user dropdown" @click="">
-    <img :src="user.avatarURL" alt="avatar" />
-
-    <div class="dropdown-content">
-      <span>{{ user.username }}</span>
-      <span>{{ user.email }}</span>
-
-      <span class="pointer" @click="logout()" v-if="store.getters.loggedIn">Logout</span>
-      <span class="pointer" @click="login()" v-else>Login</span>
+    <div v-if="store.getters.loggedIn" class="user" :class="{expanded}">
+        <img :src="profile" />
+        <span> {{username}} </span>
+        <img src="@/assets/logout.svg" @click="logout"/>
     </div>
-  </div>
+    <div v-else class="login" @click="login" :class="{expanded}">
+        <template v-if="waitingForLogin">
+            <div class="loader"></div>
+        </template>
+        <template v-else>
+            <img src="@/assets/login.svg"/>
+            <span>Login</span>
+        </template>
+    </div>
 </template>
 
 <script setup lang="ts">
-import {useStore} from "vuex";
+import type { StoreData } from "@/types";
+import { computed, onMounted, ref } from "vue";
+import { useStore } from "vuex";
 
-const store = useStore();
+const store = useStore<StoreData>();
 
-const user = {
-  avatarURL: store.getters.user.avatarURL || 'https://cdn.discordapp.com/emojis/539227703841390592.webp?size=128&quality=lossless',
-  username: store.getters.user.username || 'Benutzer',
-  email: store.getters.user.email || 'test@test.de'
+const DEFAULT_PROFILE = "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg";
+
+const waitingForLogin = ref(false);
+
+defineProps({
+  expanded: {
+    type: Boolean
+  }
+})
+
+const username = computed(() => {
+    return store.state.user?.name.toString() || "USER NOT FOUND";
+})
+
+const profile = computed(() => {
+    return store.state.user?.avatarURL.toString() || DEFAULT_PROFILE;
+})
+
+function logout() {
+    //TODO
+
+    //send logout to backend
+    store.state.user = null;
 }
 
-const login = () => {
-  //TODO
+function login() {
+    //TODO
+
+    // get user from backend
+    waitingForLogin.value = true;
+    setTimeout(() => {
+        waitingForLogin.value = false;
+        store.state.user = {
+            name: "Bobby",
+            avatarURL: "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg"
+        }
+    }, 2000)
 }
 
-const logout = () => {
-  //TODO
-}
 </script>
 
 <style scoped lang="scss">
-.user {
-  font-family: 'Open Sans', sans-serif;
-  line-height: 12px;
-  font-size: 25px;
-  margin-top: 1px;
-  position: absolute;
-  top: 0;
-  right: 0;
+@use "../variables.scss" as *;
 
-  img {
-    border-radius: 50%;
+$panel-height: 50px;
+$icon-height: 25px;
+$profile-size: 40px;
+
+.user {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: $panel-height;
+    position: relative;
 
     &:hover {
-      outline: 2px solid black;
-      cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.1);
+
+        > img:last-of-type {
+            opacity: 1;
+        }
     }
-  }
+
+    $image-padding: 0px;
+    > img:first-of-type {
+
+        position: absolute;
+        border-radius: 50%;
+        left: calc($sidebar-max-width - $profile-size);
+        transition: $sidebar-expand-time;
+
+        width: $profile-size;
+        padding: $image-padding;
+    }
+
+    
+    > img:last-of-type {
+        filter: invert(26%) sepia(68%) saturate(7495%) hue-rotate(354deg) brightness(93%) contrast(124%);
+        height: $icon-height;
+        position: absolute;
+        right: 15px;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+
+    &.expanded > img:first-of-type {
+        left: $image-padding;
+    }
+    > *:not(img) {
+        opacity: 0;
+        transition: $sidebar-expand-time;
+    }
+
+    &.expanded > * {
+        opacity: 1;
+    }
 }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #121212;
-  min-width: 160px;
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-  z-index: 1;
-  right: 0;
+.login {
+    height: $panel-height;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 
-  span {
-    color: white;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &.expanded > img {
+        opacity: 0;
+    }
+
+    > img {
+        filter: invert(1);
+        height: $icon-height;
+
+        position: absolute;
+        right: $sidebar-hidden-width * 0.5 - $icon-height * 0.5;
+        
+        transition: $sidebar-expand-time * 0.5;
+        opacity: 1;
+    }
+
+    .loader {
+        border: 4px solid #f3f3f3; /* Light grey */
+        border-top: 4px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: $icon-height;
+        height: $icon-height;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 }
 
-.dropdown:hover .dropdown-content {display: block;}
-
-.pointer {
-  cursor: pointer;
-}
 </style>

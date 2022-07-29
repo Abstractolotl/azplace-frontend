@@ -1,126 +1,160 @@
 <template>
-  <div class="board-wrapper">
-    <div ref="selector" class="selector" @mousedown="disableSelector" @wheel="disableSelector"></div>
-    <div ref="board" class="board">
-      <canvas ref="canvas" @mouseup="getMousePos" @mousedown="disableSelector" @wheel="disableSelector"></canvas>
+  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown">
+    <div ref="selector" class="selector"></div>
+    <div ref="board" class="board" @mouseup="onMouseUp">
+      <canvas ref="htmlCanvas"></canvas>
     </div>
-    <div ref="colorButton" class="colorButton"  @mousedown="colorSelectedPixel"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type {StoreData} from "@/types";
-import {onMounted, ref} from "vue";
+
+import type {StoreData, Board} from "@/types";
+import {onMounted, ref, watch} from "vue";
 import {Store, useStore} from "vuex";
-import panzoom from "panzoom";
+import panzoom, { type PanZoom } from "panzoom";
 
 const store: Store<StoreData> = useStore();
-const canvas = ref<HTMLCanvasElement>();
+const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
 const colorButton = ref<HTMLElement>();
-// @ts-ignore: Unreachable code error
-const fanZoom = ref<PanZoom.PanZoom>();
+const fanZoom = ref<PanZoom>();
 
-let selectedPixelX = 0
-let selectedPixelY = 0
-
-//Mock data
-/*
-const enis = Uint8Array.from("2552255225525555");
-const smiley = Uint8Array.from("7007000070070770");
-const karo = Uint8Array.from("1313313113133131");
-const ring = Uint8Array.from("4444455445544444");
- */
-
-function loadBoard(/*data: Uint8Array*/) {
-  if (!canvas.value) return;
-
-  let ctx = canvas.value.getContext("2d") as CanvasRenderingContext2D;
-
-  for (let i = 0; i < store.state.canvas.width; i++) {
-    for (let j = 0; j < store.state.canvas.height; j++) {
-      ctx.fillStyle = store.state.canvas.colors[getRandomInt(5)/*getColor(i + 1, j, karo)*/].toString();
-      ctx.fillRect(i, j, 1, 1);
-    }
-  }
-
-}
-
-function getRandomInt(max:number) {
-  return Math.floor(Math.random() * max);
-}
-
-function selectPixel(x: number, y: number, scale: number) {
-  if (!selector.value) return;
-  selector.value.style.left = x + "px";
-  selector.value.style.top = y + "px";
-  selector.value.style.width = scale + "px"
-  selector.value.style.height = scale + "px";
-}
-
-function setSelectedPixel(x:number, y:number) {
-  selectedPixelX = x;
-  selectedPixelY = y;
-}
 
 onMounted(() => {
-  if (!board.value) return;
+	if (!board.value) return; //TODO
 
-  fanZoom.value = panzoom(board.value, {smoothScroll: false}).zoomTo(-250 , -50, 3)
-  loadBoard();
+
+	fanZoom.value = panzoom(board.value, {smoothScroll: false})
+	fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
+	loadMockData();
+	disableSelector();
 })
 
-const getColor = (x: number, y: number, arr: Uint8Array) => {
-  return arr[y * 4 + x - 1];
+watch(store.state, () => {
+	if(!selector.value || !store.state.canvas) return;
+	selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+})
+
+function loadBoard(board: Board) {
+	if (!htmlCanvas.value) return; //TODO
+
+	let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
+	for (let i = 0; i < board.width; i++) {
+		for (let j = 0; j < board.height; j++) {
+			const index = getColorFromData(i, j, board.width, board.height, board.initialData);
+			ctx.fillStyle = store.state.canvas.colors[index].toString();
+			ctx.fillRect(i, j, 1, 1);
+		}
+	}	
 }
 
-const disableSelector = () => {
-  selector.value?.classList.add("hidden")
+function selectPixel(x: number, y: number) {
+  	if (!selector.value || !fanZoom.value) return; //TODO
+	if(x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return {x: -1, y: -1}; //TODO
+
+
+    let transform = fanZoom.value.getTransform();
+    let scale = transform.scale;
+    let transformedX = transform.x + x * scale;
+    let transformedY = transform.y + y * scale;
+
+	selector.value.style.left = transformedX + "px";
+	selector.value.style.top = transformedY + "px";
+	selector.value.style.width = scale + "px"
+	selector.value.style.height = scale + "px";
+	enableSelector();
 }
 
-const enableSelector = () => {
-  selector.value?.classList.remove("hidden")
+function loadMockData() {
+	setTimeout(() => {
+	store.state.canvas = {
+		width: 4,
+		height: 4,
+		colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"],
+		initialData: Uint8Array.from([1,3,1,3,3,1,3,1,1,3,1,3,3,1,3,1])
+	}
+
+	loadBoard(store.state.canvas);
+  }, 1000)
 }
 
-const colorSelectedPixel = () => {
-  if (!canvas.value) return;
-  let ctx = canvas.value.getContext("2d") as CanvasRenderingContext2D;
+const getColorFromData = (x: number, y: number, width: number, height: number, data: Uint8Array) => {
+  return data[y * width + x];
+}
+
+function disableSelector() {
+  	selector.value?.classList.add("hidden")
+	store.state.selecting = false;
+
+	hideColorPalette();
+}
+
+function enableSelector() {
+  	selector.value?.classList.remove("hidden")
+	store.state.selecting = true;
+
+	showColorPalette();
+}
+
+function colorSelectedPixel () {
+  if (!htmlCanvas.value) return;
+  let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
 
   console.log("color")
-
-  ctx.fillStyle = store.getters.selectedColor.toString();
-  ctx.fillRect(selectedPixelX, selectedPixelY, 1, 1);
 }
-// @ts-ignore: Unreachable code error
-const getMousePos = (evt) => {
-  if (!canvas.value)
-    return
-  const rect = canvas.value.getBoundingClientRect();
-  let x = Math.floor(((evt.clientX - rect.left) / (rect.right - rect.left)) * canvas.value.width)
-  let y = Math.floor(((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.value.height)
-  setSelectedPixel(x, y)
-  console.log("x:", x, ", y:", y);
 
-  let transform = fanZoom.value.getTransform();
-  let scale = transform.scale;
-  let transformedX = transform.x + x * scale;
-  let transformedY = transform.y + y * scale;
-  selectPixel(transformedX, transformedY, scale)
-  enableSelector()
-};
+function showColorPalette() {
+    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "palette", width: 250, forceOpen: true}}))
+}
+
+function hideColorPalette() {
+}
+
+const mouseDownPos = ref({x: 0, y: 0})
+
+function onMouseDown(e: MouseEvent) {
+	mouseDownPos.value = {x: e.x, y: e.y};
+	disableSelector();
+}
+
+function onMouseUp(e: MouseEvent) {
+	const distToMouseDown  = Math.sqrt( (e.x - mouseDownPos.value.x) * (e.x - mouseDownPos.value.x) + (e.y - mouseDownPos.value.y) * (e.y - mouseDownPos.value.y) )
+	if(distToMouseDown < 50) {
+		const pos = getBoardCoordsFromMousePos(e.x, e.y);
+		if(!pos) return;
+		selectPixel(pos.x, pos.y)
+	} else {
+		document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
+	}
+}
+
+function onMouseWheel() {
+	console.log(123);
+	disableSelector();
+}
+
+function getBoardCoordsFromMousePos(x:number, y:number) {
+	if(!htmlCanvas.value) return ; //TODO
+
+    const rect = htmlCanvas.value.getBoundingClientRect();
+    let boardX = Math.floor(((x - rect.left) / (rect.right - rect.left)) * htmlCanvas.value.width)
+    let boardY = Math.floor(((y - rect.top) / (rect.bottom - rect.top)) * htmlCanvas.value.height)
+	return {x: boardX, y: boardY}
+}
 
 </script>
 
 <style scoped>
 
 .board-wrapper {
-  height: 100%;
-  width: 100%;
-  background-color: lightgray;
-  overflow: hidden;
+	height: 100%;
+	width: 100%;
+	background-color: lightgray;
+	overflow: hidden;
 
-  position: relative;
+	position: relative;
 }
 
 .selector {
@@ -131,8 +165,10 @@ const getMousePos = (evt) => {
 
   width: 50px;
   height: 50px;;
-  background-color: rgba(1,1,1,0.5);
-  z-index: 100;
+  z-index: 10;
+
+  outline: 1px solid white;
+  box-shadow: 0px 0px 10px 5px rgba(0,0,0, 0.25);
 }
 
 .colorButton {
