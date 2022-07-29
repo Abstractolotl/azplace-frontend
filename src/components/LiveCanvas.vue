@@ -25,23 +25,29 @@ let selectedPixelX = 0
 let selectedPixelY = 0
 
 //Mock data
+/*
 const enis = Uint8Array.from("2552255225525555");
 const smiley = Uint8Array.from("7007000070070770");
 const karo = Uint8Array.from("1313313113133131");
 const ring = Uint8Array.from("4444455445544444");
+ */
 
-function loadBoard(data: Uint8Array) {
+function loadBoard(/*data: Uint8Array*/) {
   if (!canvas.value) return;
 
   let ctx = canvas.value.getContext("2d") as CanvasRenderingContext2D;
 
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      ctx.fillStyle = store.state.canvas.colors[getColor(i + 1, j, karo)].toString();
+  for (let i = 0; i < store.state.canvas.width; i++) {
+    for (let j = 0; j < store.state.canvas.height; j++) {
+      ctx.fillStyle = store.state.canvas.colors[getRandomInt(5)/*getColor(i + 1, j, karo)*/].toString();
       ctx.fillRect(i, j, 1, 1);
     }
   }
 
+}
+
+function getRandomInt(max:number) {
+  return Math.floor(Math.random() * max);
 }
 
 function selectPixel(x: number, y: number, scale: number) {
@@ -60,9 +66,8 @@ function setSelectedPixel(x:number, y:number) {
 onMounted(() => {
   if (!board.value) return;
 
-
-  fanZoom.value = panzoom(board.value, {smoothScroll: false})
-  loadBoard(karo);
+  fanZoom.value = panzoom(board.value, {smoothScroll: false}).zoomTo(-250 , -50, 3)
+  loadBoard();
 })
 
 const getColor = (x: number, y: number, arr: Uint8Array) => {

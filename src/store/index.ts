@@ -5,8 +5,8 @@ export const store: Store<StoreData> = createStore({
     state: function() {
         return {
             canvas: {
-                width: 4,
-                height: 4,
+                width: 320,
+                height: 160,
                 colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"]
             },
             selectedColorIndex: 0,
