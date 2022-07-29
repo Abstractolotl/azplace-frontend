@@ -92,7 +92,7 @@ const colorSelectedPixel = () => {
   ctx.fillStyle = store.getters.selectedColor.toString();
   ctx.fillRect(selectedPixelX, selectedPixelY, 1, 1);
 }
-
+// @ts-ignore: Unreachable code error
 const getMousePos = (evt) => {
   if (!canvas.value)
     return
