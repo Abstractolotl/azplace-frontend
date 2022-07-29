@@ -1,10 +1,9 @@
 <template>
-  <div class="board-wrapper">
+  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown">
     <div ref="selector" class="selector"></div>
-    <div ref="board" class="board" @mousedown="onMouseDown" @mouseup="onMouseUp">
+    <div ref="board" class="board" @mouseup="onMouseUp">
       <canvas ref="htmlCanvas"></canvas>
     </div>
-    <div ref="colorButton" class="colorButton"></div>
   </div>
 </template>
 
@@ -24,9 +23,11 @@ const fanZoom = ref<PanZoom>();
 
 
 onMounted(() => {
-	if (!board.value || !store.state.canvas) return; //TODO
+	if (!board.value) return; //TODO
+
 
 	fanZoom.value = panzoom(board.value, {smoothScroll: false})
+	fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
 	loadMockData();
 	disableSelector();
 })
@@ -36,12 +37,12 @@ watch(store.state, () => {
 	selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
 })
 
-function loadBoard(width: number, height: number, board: Board) {
+function loadBoard(board: Board) {
 	if (!htmlCanvas.value) return; //TODO
 
 	let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
-	for (let i = 0; i < width; i++) {
-		for (let j = 0; j < height; j++) {
+	for (let i = 0; i < board.width; i++) {
+		for (let j = 0; j < board.height; j++) {
 			const index = getColorFromData(i, j, board.width, board.height, board.initialData);
 			ctx.fillStyle = store.state.canvas.colors[index].toString();
 			ctx.fillRect(i, j, 1, 1);
@@ -49,14 +50,21 @@ function loadBoard(width: number, height: number, board: Board) {
 	}	
 }
 
-function selectPixel(x: number, y: number, scale: number) {
-  if (!selector.value) return;
+function selectPixel(x: number, y: number) {
+  	if (!selector.value || !fanZoom.value) return; //TODO
+	if(x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return {x: -1, y: -1}; //TODO
 
-  enableSelector();
-  selector.value.style.left = x + "px";
-  selector.value.style.top = y + "px";
-  selector.value.style.width = scale + "px"
-  selector.value.style.height = scale + "px";
+
+    let transform = fanZoom.value.getTransform();
+    let scale = transform.scale;
+    let transformedX = transform.x + x * scale;
+    let transformedY = transform.y + y * scale;
+
+	selector.value.style.left = transformedX + "px";
+	selector.value.style.top = transformedY + "px";
+	selector.value.style.width = scale + "px"
+	selector.value.style.height = scale + "px";
+	enableSelector();
 }
 
 function loadMockData() {
@@ -67,6 +75,8 @@ function loadMockData() {
 		colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"],
 		initialData: Uint8Array.from([1,3,1,3,3,1,3,1,1,3,1,3,3,1,3,1])
 	}
+
+	loadBoard(store.state.canvas);
   }, 1000)
 }
 
@@ -76,10 +86,16 @@ const getColorFromData = (x: number, y: number, width: number, height: number, d
 
 function disableSelector() {
   	selector.value?.classList.add("hidden")
+	store.state.selecting = false;
+
+	hideColorPalette();
 }
 
 function enableSelector() {
   	selector.value?.classList.remove("hidden")
+	store.state.selecting = true;
+
+	showColorPalette();
 }
 
 function colorSelectedPixel () {
@@ -90,15 +106,10 @@ function colorSelectedPixel () {
 }
 
 function showColorPalette() {
-	store.state.sidebar.expanded = true;
-	store.state.sidebar.panel = "palette";
+    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "palette", width: 250, forceOpen: true}}))
 }
 
 function hideColorPalette() {
-	if(store.state.sidebar.panel === "palette") {
-		store.state.sidebar.expanded = false;
-		store.state.sidebar.panel = "";
-	}
 }
 
 const mouseDownPos = ref({x: 0, y: 0})
@@ -106,38 +117,32 @@ const mouseDownPos = ref({x: 0, y: 0})
 function onMouseDown(e: MouseEvent) {
 	mouseDownPos.value = {x: e.x, y: e.y};
 	disableSelector();
-	console.log(fanZoom.value?.getTransform().scale)
 }
 
 function onMouseUp(e: MouseEvent) {
-
 	const distToMouseDown  = Math.sqrt( (e.x - mouseDownPos.value.x) * (e.x - mouseDownPos.value.x) + (e.y - mouseDownPos.value.y) * (e.y - mouseDownPos.value.y) )
 	if(distToMouseDown < 50) {
-
+		const pos = getBoardCoordsFromMousePos(e.x, e.y);
+		if(!pos) return;
+		selectPixel(pos.x, pos.y)
+	} else {
+		document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
 	}
 }
 
-function getBoardCoordsFromMousePos(x:number, y:number) {
-	if(!htmlCanvas.value || x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return {x: -1, y: -1}; //TODO
+function onMouseWheel() {
+	console.log(123);
+	disableSelector();
+}
 
+function getBoardCoordsFromMousePos(x:number, y:number) {
+	if(!htmlCanvas.value) return ; //TODO
 
     const rect = htmlCanvas.value.getBoundingClientRect();
     let boardX = Math.floor(((x - rect.left) / (rect.right - rect.left)) * htmlCanvas.value.width)
     let boardY = Math.floor(((y - rect.top) / (rect.bottom - rect.top)) * htmlCanvas.value.height)
 	return {x: boardX, y: boardY}
 }
-
-const getMousePos = (evt: MouseEvent) => {
-    if (!htmlCanvas.value || !fanZoom.value) return; //TODO
-
-
-    let transform = fanZoom.value.getTransform();
-    let scale = transform.scale;
-    let transformedX = transform.x + x * scale;
-    let transformedY = transform.y + y * scale;
-    selectPixel(transformedX, transformedY, scale)
-    enableSelector()
-};
 
 </script>
 
@@ -160,7 +165,7 @@ const getMousePos = (evt: MouseEvent) => {
 
   width: 50px;
   height: 50px;;
-  z-index: 100;
+  z-index: 10;
 
   outline: 1px solid white;
   box-shadow: 0px 0px 10px 5px rgba(0,0,0, 0.25);

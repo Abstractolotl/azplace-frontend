@@ -68,6 +68,7 @@ function login() {
 
 $panel-height: 50px;
 $icon-height: 25px;
+$profile-size: 40px;
 
 .user {
     display: flex;
@@ -84,14 +85,15 @@ $icon-height: 25px;
         }
     }
 
+    $image-padding: 0px;
     > img:first-of-type {
+
         position: absolute;
         border-radius: 50%;
-        right: 0;
+        left: calc($sidebar-max-width - $profile-size);
         transition: $sidebar-expand-time;
 
-        $image-padding: 7px;
-        width: $sidebar-hidden-width - calc(2 * $image-padding);
+        width: $profile-size;
         padding: $image-padding;
     }
 
@@ -107,10 +109,11 @@ $icon-height: 25px;
     
 
     &.expanded > img:first-of-type {
-        right: $sidebar-max-width - $sidebar-hidden-width ;
+        left: $image-padding;
     }
     > *:not(img) {
         opacity: 0;
+        transition: $sidebar-expand-time;
     }
 
     &.expanded > * {
