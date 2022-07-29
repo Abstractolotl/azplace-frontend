@@ -11,8 +11,6 @@ export const store: Store<StoreData> = createStore({
             },
             selectedColorIndex: 0,
             loggedIn: false,
-            colors: [],
-            selectedColor: '',
             user: {
                 username: '',
                 avatarURL: '',
@@ -32,15 +30,12 @@ export const store: Store<StoreData> = createStore({
         canvasHeight: state => state.canvas.height,
         user: state => state.user,
         loggedIn: state => state.loggedIn,
+        selectedColor: state => state.canvas.colors[state.selectedColorIndex],
     },
     mutations: {
-        SET_SELECTED_COLOR: (state, color) => {
-            state.selectedColor = color;
-        }
+
     },
     actions: {
-        setSelectedColor(context, color) {
-            context.commit('SET_SELECTED_COLOR', color);
-        }
+
     }
 });

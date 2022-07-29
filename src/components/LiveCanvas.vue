@@ -1,9 +1,10 @@
 <template>
   <div class="board-wrapper">
-    <div ref="selector" class="selector"></div>
+    <div ref="selector" class="selector" @mousedown="disableSelector" @wheel="disableSelector"></div>
     <div ref="board" class="board">
-      <canvas ref="canvas" @mouseup="getMousePos" @mousedown="disableSelector"></canvas>
+      <canvas ref="canvas" @mouseup="getMousePos" @mousedown="disableSelector" @wheel="disableSelector"></canvas>
     </div>
+    <div ref="colorButton" class="colorButton"  @mousedown="colorSelectedPixel"></div>
   </div>
 </template>
 
@@ -17,10 +18,11 @@ const store: Store<StoreData> = useStore();
 const canvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
+const colorButton = ref<HTMLElement>();
 const fanZoom = ref<PanZoom.PanZoom>();
 
-let selectedPixelX = null
-let selectedPixelY = null
+let selectedPixelX = 0
+let selectedPixelY = 0
 
 //Mock data
 const enis = Uint8Array.from("2552255225525555");
@@ -50,10 +52,16 @@ function selectPixel(x: number, y: number, scale: number) {
   selector.value.style.height = scale + "px";
 }
 
+function setSelectedPixel(x:number, y:number) {
+  selectedPixelX = x;
+  selectedPixelY = y;
+}
+
 onMounted(() => {
   if (!board.value) return;
 
-  fanZoom.value = panzoom(board.value)
+
+  fanZoom.value = panzoom(board.value, {smoothScroll: false})
   loadBoard(karo);
 })
 
@@ -69,12 +77,23 @@ const enableSelector = () => {
   selector.value?.classList.remove("hidden")
 }
 
+const colorSelectedPixel = () => {
+  if (!canvas.value) return;
+  let ctx = canvas.value.getContext("2d") as CanvasRenderingContext2D;
+
+  console.log("color")
+
+  ctx.fillStyle = store.getters.selectedColor.toString();
+  ctx.fillRect(selectedPixelX, selectedPixelY, 1, 1);
+}
+
 const getMousePos = (evt) => {
   if (!canvas.value)
     return
   const rect = canvas.value.getBoundingClientRect();
   let x = Math.floor(((evt.clientX - rect.left) / (rect.right - rect.left)) * canvas.value.width)
   let y = Math.floor(((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.value.height)
+  setSelectedPixel(x, y)
   console.log("x:", x, ", y:", y);
 
   let transform = fanZoom.value.getTransform();
@@ -84,10 +103,6 @@ const getMousePos = (evt) => {
   selectPixel(transformedX, transformedY, scale)
   enableSelector()
 };
-
-const setSelectedPixel = () => {
-
-}
 
 </script>
 
@@ -110,8 +125,19 @@ const setSelectedPixel = () => {
 
   width: 50px;
   height: 50px;;
-  background-color: red;
+  background-color: rgba(1,1,1,0.5);
   z-index: 100;
+}
+
+.colorButton {
+  position: absolute;
+  top: 800px;
+  left: 125px;
+
+  width: 50px;
+  height: 50px;;
+  background-color: rgba(1,0,0,1);
+  z-index: 200;
 }
 
 .hidden {
