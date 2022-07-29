@@ -19,6 +19,7 @@ const canvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
 const colorButton = ref<HTMLElement>();
+// @ts-ignore: Unreachable code error
 const fanZoom = ref<PanZoom.PanZoom>();
 
 let selectedPixelX = 0
