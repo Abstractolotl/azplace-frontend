@@ -23,7 +23,7 @@ const fanZoom = ref<PanZoom>();
 
 
 onMounted(() => {
-	if (!board.value) return; //TODO
+	if (!board.value || !htmlCanvas.value) return; //TODO
 
 
 	fanZoom.value = panzoom(board.value, {smoothScroll: false})
@@ -38,7 +38,7 @@ watch(store.state, () => {
 })
 
 function loadBoard(board: Board) {
-	if (!htmlCanvas.value) return; //TODO
+	if (!htmlCanvas.value || !store.state.canvas) return; //TODO
 
 	let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
 	for (let i = 0; i < board.width; i++) {
@@ -51,7 +51,7 @@ function loadBoard(board: Board) {
 }
 
 function selectPixel(x: number, y: number) {
-  	if (!selector.value || !fanZoom.value) return; //TODO
+  	if (!selector.value || !fanZoom.value || !store.state.canvas) return; //TODO
 	if(x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return {x: -1, y: -1}; //TODO
 
 

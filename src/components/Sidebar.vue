@@ -65,7 +65,7 @@ onMounted(() => {
     if (!sidebar.value) return; //TODO
 
 
-    changeWidth(store.state.sidebar.width);
+    changeWidth(store.state.sidebar.width.valueOf());
     //sidebar.value.style.width = WIDTH_EXPANDED + "px";
 
     closeNav();
@@ -74,7 +74,7 @@ onMounted(() => {
     })
     sidebar.value.addEventListener("mouseleave", closeNav);
 
-
+    //@ts-ignore
     document.addEventListener("navigate", onNavigate)
     
 })
