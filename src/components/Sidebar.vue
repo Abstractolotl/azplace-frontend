@@ -1,6 +1,7 @@
 <template>
     <div ref="sidebar" class="sidebar">
         <div class="expand-hint"><span :class="{hidden: navbarOpen}">></span></div>
+        <UserProfile :expanded="navbarOpen" />
         <div class="palette"  :class="{hidden: !navbarOpen}">
         <h2> Color Palette </h2>
             <div v-for="(color, index) in store.state.canvas.colors">
@@ -15,36 +16,44 @@ import type { StoreData } from "@/types";
 import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import ColorTile from "./ColorTile.vue";
+import UserProfile from "./UserProfile.vue";
 
 const store = useStore<StoreData>();
 const sidebar = ref<HTMLElement>();
 
+const WIDTH_EXPANDED = 250;
+const WIDTH_HIDDEN = 50;
+
 let navbarOpen = ref(false);
 
 onMounted(() => {
+    if(!sidebar.value) return; //TODO
+    sidebar.value.style.width = WIDTH_EXPANDED + "px";
     closeNav();
     document.addEventListener("mousemove", e => {
-        if(e.x <= 50 && !navbarOpen.value) openNav();
-        if(e.x > 200 && navbarOpen.value) closeNav();
+        if(e.x <= WIDTH_HIDDEN && !navbarOpen.value) openNav();
+        if(e.x > WIDTH_EXPANDED + 50 && navbarOpen.value) closeNav();
     })
 })
 
 const openNav = () => {
-    if(!sidebar.value) return;
+    if(!sidebar.value) return; //TODO
     sidebar.value.style.left = "0px";
 
     navbarOpen.value = true;
 }
 
 const closeNav = () => {
-    if(!sidebar.value) return;
-    sidebar.value.style.left = "-125px";
+    if(!sidebar.value) return; //TODO
+    sidebar.value.style.left = (WIDTH_HIDDEN - WIDTH_EXPANDED) + "px";
 
     navbarOpen.value = false;
 }
 </script>
 
 <style scoped lang="scss">
+@use "../variables.scss" as *;
+
 .sidebar {
   height: 100%;
   position: fixed;
@@ -53,9 +62,8 @@ const closeNav = () => {
   left: 0;
   background-color: #111;
   overflow-x: hidden;
-  transition: 0.5s;
+  transition: $sidebar-expand-time;
   color: white;
-  width: 150px;
 }
 
 .expand-hint {

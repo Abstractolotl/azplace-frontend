@@ -1,6 +1,5 @@
 <template>
   <div class="board-wrapper">
-    <div ref="selector" class="selector"></div>
     <div ref="board" class="board">
       <canvas ref="canvas" @mouseup="getMousePos" @mousedown="disableSelector"></canvas>
     </div>

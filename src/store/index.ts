@@ -10,20 +10,9 @@ export const store: Store<StoreData> = createStore({
                 colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"]
             },
             selectedColorIndex: 0,
-            loggedIn: false,
-            colors: [],
-            selectedColor: '',
             user: {
-                username: '',
-                avatarURL: '',
-                email: '',
-                stats: {
-                    pixelsPlaced: 0,
-                    colorsUsed: 0
-                },
-                language: 'de',
-                defaultColor: '',
-                darkMode: true
+                name: 'Bobb',
+                avatarURL: 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg',
             }
         }
     },
@@ -31,16 +20,10 @@ export const store: Store<StoreData> = createStore({
         canvasWidth: state => state.canvas.width,
         canvasHeight: state => state.canvas.height,
         user: state => state.user,
-        loggedIn: state => state.loggedIn,
+        loggedIn: state => !!state.user,
     },
     mutations: {
-        SET_SELECTED_COLOR: (state, color) => {
-            state.selectedColor = color;
-        }
     },
     actions: {
-        setSelectedColor(context, color) {
-            context.commit('SET_SELECTED_COLOR', color);
-        }
     }
 });
