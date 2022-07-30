@@ -1,7 +1,7 @@
 <template>
-  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown">
+  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown"  @mouseup="onMouseUp">
     <div ref="selector" class="selector"></div>
-    <div ref="board" class="board" @mouseup="onMouseUp">
+    <div ref="board" class="board">
       <canvas ref="htmlCanvas"></canvas>
     </div>
   </div>
@@ -21,12 +21,15 @@ const selector = ref<HTMLElement>();
 const colorButton = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 
+const MIN_ZOOM = 15;
+const MAX_MOUSE_MOVE = 50; //distance the mouse can be moved while selecting a tile
+
 
 onMounted(() => {
 	if (!board.value || !htmlCanvas.value) return; //TODO
 
 
-	fanZoom.value = panzoom(board.value, {smoothScroll: false})
+	fanZoom.value = panzoom(board.value, {smoothScroll: false, zoomDoubleClickSpeed: 1})
 	fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
 	loadMockData();
 	disableSelector();
@@ -53,7 +56,6 @@ function loadBoard(board: Board) {
 function selectPixel(x: number, y: number) {
   	if (!selector.value || !fanZoom.value || !store.state.canvas) return; //TODO
 	if(x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return {x: -1, y: -1}; //TODO
-
 
     let transform = fanZoom.value.getTransform();
     let scale = transform.scale;
@@ -120,18 +122,19 @@ function onMouseDown(e: MouseEvent) {
 }
 
 function onMouseUp(e: MouseEvent) {
+	if(fanZoom.value?.getTransform()?.scale < MIN_ZOOM) return;
 	const distToMouseDown  = Math.sqrt( (e.x - mouseDownPos.value.x) * (e.x - mouseDownPos.value.x) + (e.y - mouseDownPos.value.y) * (e.y - mouseDownPos.value.y) )
-	if(distToMouseDown < 50) {
+	if(distToMouseDown < MAX_MOUSE_MOVE) {
 		const pos = getBoardCoordsFromMousePos(e.x, e.y);
 		if(!pos) return;
 		selectPixel(pos.x, pos.y)
 	} else {
+		//TODO remove hard coded width
 		document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
 	}
 }
 
 function onMouseWheel() {
-	console.log(123);
 	disableSelector();
 }
 

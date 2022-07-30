@@ -85,12 +85,12 @@ $profile-size: 40px;
         }
     }
 
-    $image-padding: 0px;
+    $image-padding: 5px;
     > img:first-of-type {
 
         position: absolute;
         border-radius: 50%;
-        left: calc($sidebar-max-width - $profile-size);
+        left: calc($sidebar-max-width - $profile-size - $image-padding * 2);
         transition: $sidebar-expand-time;
 
         width: $profile-size;
@@ -111,6 +111,7 @@ $profile-size: 40px;
     &.expanded > img:first-of-type {
         left: $image-padding;
     }
+
     > *:not(img) {
         opacity: 0;
         transition: $sidebar-expand-time;
@@ -135,6 +136,7 @@ $profile-size: 40px;
 
     &.expanded > img {
         opacity: 0;
+        right: 50%;
     }
 
     > img {
@@ -144,7 +146,7 @@ $profile-size: 40px;
         position: absolute;
         right: $sidebar-hidden-width * 0.5 - $icon-height * 0.5;
         
-        transition: $sidebar-expand-time * 0.5;
+        transition: $sidebar-expand-time * 0.75;
         opacity: 1;
     }
 
