@@ -66,12 +66,9 @@ function changeWidth(width: number) {
 onMounted(() => {
     if (!sidebar.value) return; //TODO
 
-
     changeWidth(store.state.sidebar.width.valueOf());
-    //sidebar.value.style.width = WIDTH_EXPANDED + "px";
 
-    //closeNav();
-    openNav();
+    closeNav();
     document.addEventListener("mousemove", e => {
         if (e.x <= 100 && !navbarOpen.value) openNav();
     })
