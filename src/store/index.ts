@@ -1,45 +1,34 @@
-import type { StoreData } from "@/types";
+import type { Board, StoreData } from "@/types";
+import { reactive } from "vue";
 import { createStore, Store } from "vuex";
+
+//Mock data
 
 export const store: Store<StoreData> = createStore({
     state: function() {
         return {
-            canvas: {
-                width: 4,
-                height: 4,
-                colors: []
-            },
+            canvas: null,
             selectedColorIndex: 0,
-            loggedIn: false,
-            selectedColor: '',
+            selecting: false,
             user: {
-                username: '',
-                avatarURL: '',
-                email: '',
-                stats: {
-                    pixelsPlaced: 0,
-                    colorsUsed: 0
-                },
-                language: navigator.language || 'en',
-                defaultColor: '',
-                darkMode: true
+                name: 'Bobb',
+                avatarURL: 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg',
+            },
+            sidebar: {
+                expanded: false,
+                panel: "",
+                width: 250
             }
         }
     },
     getters: {
-        canvasWidth: state => state.canvas.width,
-        canvasHeight: state => state.canvas.height,
+        canvasWidth: state => state.canvas?.width,
+        canvasHeight: state => state.canvas?.height,
         user: state => state.user,
-        loggedIn: state => state.loggedIn,
+        loggedIn: state => !!state.user,
     },
     mutations: {
-        SET_SELECTED_COLOR: (state, color) => {
-            state.selectedColor = color;
-        }
     },
     actions: {
-        setSelectedColor(context, color) {
-            context.commit('SET_SELECTED_COLOR', color);
-        }
-    }
+    },
 });
