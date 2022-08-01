@@ -8,6 +8,12 @@ export const store: Store<StoreData> = createStore({
     state: function() {
         return {
             canvas: null,
+            canvasInfo: {
+                id: 0,
+                width: 10,
+                height: 10,
+                colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"]
+            },
             selectedColorIndex: 0,
             selecting: false,
             user: {
@@ -18,12 +24,13 @@ export const store: Store<StoreData> = createStore({
                 expanded: false,
                 panel: "",
                 width: 250
-            }
+            },
+            randomNumber: ""
         }
     },
     getters: {
-        canvasWidth: state => state.canvas?.width,
-        canvasHeight: state => state.canvas?.height,
+        canvasWidth: state => state.canvasInfo?.width,
+        canvasHeight: state => state.canvasInfo?.height,
         user: state => state.user,
         loggedIn: state => !!state.user,
     },
