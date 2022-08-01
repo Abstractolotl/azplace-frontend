@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import type { StoreData } from "@/types";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import ColorTile from "./ColorTile.vue";
 import UserProfile from "./UserProfile.vue";

@@ -40,6 +40,9 @@ watch(store.state, () => {
 function loadBoard(board: Board) {
 	if (!htmlCanvas.value) return; //TODO
 
+    htmlCanvas.value.width = store.state.canvas.width;
+    htmlCanvas.value.height = store.state.canvas.height;
+
 	let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
 	for (let i = 0; i < board.width; i++) {
 		for (let j = 0; j < board.height; j++) {
