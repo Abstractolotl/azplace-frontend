@@ -12,9 +12,13 @@ export const store: Store<StoreData> = createStore({
                 id: 0,
                 width: 10,
                 height: 10,
+                cooldown: 10,
                 colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"]
             },
+            lastTimePlaced: 0,
             selectedColorIndex: 0,
+            selectedPixelX: -1,
+            selectedPixelY: -1,
             selecting: false,
             user: {
                 name: 'Bobb',

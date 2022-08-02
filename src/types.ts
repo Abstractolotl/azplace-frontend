@@ -3,7 +3,10 @@ import { reactive } from "vue";
 export interface StoreData {
     canvas: Board | null,
     canvasInfo: CanvasInfo,
+    lastTimePlaced: number,
     selectedColorIndex: number,
+    selectedPixelX: number,
+    selectedPixelY: number,
     sidebar: Sidebar
     user: User | null,
     selecting: Boolean
@@ -22,6 +25,7 @@ export interface CanvasInfo {
     id: number,
     width: number,
     height: number,
+    cooldown: number
     colors: Array<String>
 }
 

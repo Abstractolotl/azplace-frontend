@@ -26,6 +26,7 @@ function onColorClicked() {
 }
 
 function initColorFromStore() {
+    if (!store.state.canvas) return;
     if(props.colorIndex < 0 && props.colorIndex >= 16) console.log("TODO: Error");
 
     const canvas = store.state.canvas;
