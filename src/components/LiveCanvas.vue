@@ -28,14 +28,21 @@ const confirmationButton = ref<HTMLElement>();
 const colorButton = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 
+const MIN_ZOOM_SELECT = 8;
+const MIN_ZOOM = 3;
+const MAX_ZOOM = 140;
+const MAX_MOUSE_MOVE = 50; //distance the mouse can be moved while selecting a tile
+
+
 onMounted(() => {
   if (!board.value || !htmlCanvas.value) return; //TODO
 
   let zoomOptions = {
     smoothScroll: false,
     initialZoom: 3,
-    minZoom: 3,
-    maxZoom: 140
+    minZoom: MIN_ZOOM,
+    maxZoom: MAX_ZOOM,
+    zoomDoubleClickSpeed: 1
   };
 
   fanZoom.value = panzoom(board.value, zoomOptions);
@@ -85,13 +92,13 @@ function createNoise() {
 }
 
 function selectPixel(x: number, y: number) {
-  if (!selector.value || !fanZoom.value) return; //TODO
+  if (!selector.value || !fanZoom.value || !store.state.canvas) return; //TODO
   if (x < 0 || y < 0 || x >= store.state.canvasInfo.width || y >= store.state.canvasInfo.height) return {x: -1, y: -1}; //TODO
 
 
   let transform = fanZoom.value.getTransform();
   let scale = transform.scale;
-  if (scale < 10) return;
+  if (scale < MIN_ZOOM_SELECT) return;
   console.log(scale);
   let transformedX = transform.x + x * scale;
   let transformedY = transform.y + y * scale;
@@ -218,19 +225,19 @@ function onMouseDown(e: MouseEvent) {
 }
 
 function onMouseUp(e: MouseEvent) {
-  const distToMouseDown = Math.sqrt((e.x - mouseDownPos.value.x) * (e.x - mouseDownPos.value.x) + (e.y - mouseDownPos.value.y) * (e.y - mouseDownPos.value.y))
-  if (distToMouseDown < 50) {
-    const pos = getBoardCoordsFromMousePos(e.x, e.y);
-    if (!pos) return;
-    selectPixel(pos.x, pos.y)
-  } else {
-    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
-  }
+	const distToMouseDown  = Math.sqrt( (e.x - mouseDownPos.value.x) * (e.x - mouseDownPos.value.x) + (e.y - mouseDownPos.value.y) * (e.y - mouseDownPos.value.y) )
+	if(distToMouseDown < MAX_MOUSE_MOVE) {
+		const pos = getBoardCoordsFromMousePos(e.x, e.y);
+		if(!pos) return;
+		selectPixel(pos.x, pos.y)
+	} else {
+		//TODO remove hard coded width
+		document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
+	}
 }
 
 function onMouseWheel() {
-  console.log(123);
-  disableSelector();
+	disableSelector();
 }
 
 function getBoardCoordsFromMousePos(x: number, y: number) {
