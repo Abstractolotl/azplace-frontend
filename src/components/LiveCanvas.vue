@@ -25,7 +25,6 @@ const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
 const confirmationButton = ref<HTMLElement>();
-const colorButton = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 
 const MIN_ZOOM_SELECT = 8;
@@ -274,17 +273,6 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
 
   outline: 1px solid white;
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
-}
-
-.colorButton {
-  position: absolute;
-  top: 800px;
-  left: 125px;
-
-  width: 50px;
-  height: 50px;;
-  background-color: rgba(1, 0, 0, 1);
-  z-index: 200;
 }
 
 .hidden {
