@@ -1,9 +1,11 @@
 <template>
-  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown">
+  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown" @mouseup="onMouseUp">
     <div ref="selector" class="selector">
-      <button class="hidden" ref="confirmationButton" type="button" onclick="console.log('test')">place</button>
+      <div class="buttonWrapper">
+        <button class="hidden" ref="confirmationButton" type="button" onclick="console.log('test')">place</button>
+      </div>
     </div>
-    <div ref="board" class="board" @mouseup="onMouseUp">
+    <div ref="board" class="board">
       <canvas v-if="store.state.canvasInfo.width != 0" ref="htmlCanvas"></canvas>
     </div>
   </div>
@@ -29,10 +31,17 @@ const fanZoom = ref<PanZoom>();
 onMounted(() => {
   if (!board.value || !htmlCanvas.value) return; //TODO
 
-  fanZoom.value = panzoom(board.value, {smoothScroll: false})
+  let zoomOptions = {
+    smoothScroll: false,
+    initialZoom: 3,
+    minZoom: 3,
+    maxZoom: 140
+  };
+
+  fanZoom.value = panzoom(board.value, zoomOptions);
   fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
 
-  confirmationButton.value?.addEventListener("click", colorSelectedPixel)
+  confirmationButton.value?.addEventListener("click", colorSelectedPixel);
 
   loadMockData();
 
@@ -58,7 +67,7 @@ function loadBoard(board: Board) {
   for (let i = 0; i < board.width; i++) {
     for (let j = 0; j < board.height; j++) {
       const index = getColorFromData(i, j, board.width, board.height, board.initialData);
-      ctx.fillStyle = store.state.canvasInfo.colors[index/* createNoise() */].toString();
+      ctx.fillStyle = store.state.canvasInfo.colors[/*index*/createNoise()].toString();
       ctx.fillRect(i, j, 1, 1);
     }
   }
@@ -82,6 +91,8 @@ function selectPixel(x: number, y: number) {
 
   let transform = fanZoom.value.getTransform();
   let scale = transform.scale;
+  if (scale < 10) return;
+  console.log(scale);
   let transformedX = transform.x + x * scale;
   let transformedY = transform.y + y * scale;
 
@@ -114,8 +125,8 @@ const getColorFromData = (x: number, y: number, width: number, height: number, d
 }
 
 function disableSelector() {
+  if (!selector.value) return; //TODO
   selector.value?.classList.add("hidden")
-  confirmationButton.value?.classList.add("hidden")
   store.state.selecting = false;
   console.log("disableSelector");
   hideColorPalette();
@@ -131,7 +142,7 @@ function enableSelector() {
 }
 
 function colorSelectedPixel() { // TODO: send pixel placement request
-  if (isOnCooldown()) return;
+  if (isOnCooldown()) return
   let x = store.state.selectedPixelX;
   let y = store.state.selectedPixelY;
   let color = store.state.canvasInfo.colors[store.state.selectedColorIndex].toString();
@@ -234,16 +245,6 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
 </script>
 
 <style scoped>
-
-.confirmation-box {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 200px;
-  width: 200px;
-  background-color: #363636;
-  z-index: 123;
-}
 
 .board-wrapper {
   height: 100%;
