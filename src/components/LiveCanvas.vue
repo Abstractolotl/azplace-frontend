@@ -7,7 +7,7 @@
       <button ref="confirmationButton" type="button">Place</button>
     </div>
     <div ref="board" class="board">
-      <canvas v-if="store.state.canvasInfo.width != 0" ref="htmlCanvas"></canvas>
+      <canvas v-if="store.state.canvasInfo.width !== 0" ref="htmlCanvas"></canvas>
     </div>
   </div>
 </template>
@@ -33,7 +33,7 @@ const fanZoom = ref<PanZoom>();
 const MIN_ZOOM_SELECT = 8;
 const MIN_ZOOM = 3;
 const MAX_ZOOM = 140;
-const MAX_MOUSE_MOVE = 50; //distance the mouse can be moved while selecting a tile
+const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
 
 
 onMounted(() => {
@@ -168,8 +168,9 @@ function colorSelectedPixel() { // TODO: send pixel placement request
 function setButtonPos(x: number, y: number, scale: number) {
   let bw = buttonWrapper.value;
   if (!bw || !selector.value || !boardWrapper.value) return;
-  let buttonWidth = bw?.getBoundingClientRect().width;
-  let buttonHeight = bw?.getBoundingClientRect().height;
+
+  let buttonWidth = bw.getBoundingClientRect().width;
+  let buttonHeight = bw.getBoundingClientRect().height;
   let selectorCenterX = x + (scale / 2);
   let selectorCenterY = y + (scale / 2);
   let boardWidth = boardWrapper.value.getBoundingClientRect().width;
