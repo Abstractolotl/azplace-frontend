@@ -1,9 +1,10 @@
 <template>
-  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown" @mouseup="onMouseUp">
+  <div ref="boardWrapper" class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown" @mouseup="onMouseUp">
     <div ref="selector" class="selector">
-      <div class="buttonWrapper">
-        <button class="hidden" ref="confirmationButton" type="button" onclick="console.log('test')">place</button>
-      </div>
+
+    </div>
+    <div ref="buttonWrapper" class="buttonWrapper hidden">
+      <button ref="confirmationButton" type="button">Place</button>
     </div>
     <div ref="board" class="board">
       <canvas v-if="store.state.canvasInfo.width != 0" ref="htmlCanvas"></canvas>
@@ -24,6 +25,8 @@ const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
+const buttonWrapper = ref<HTMLElement>();
+const boardWrapper = ref<HTMLElement>();
 const confirmationButton = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 
@@ -83,7 +86,6 @@ function handleWebSocketMessage(event: MessageEvent) {
   let message = JSON.parse(event.data);
   if (!message.x || !message.y || !message.colorIndex) return;
   setPixel(message.x, message.y, store.state.canvasInfo.colors[message.colorIndex].toString());
-  console.log(message.colorIndex);
 }
 
 function createNoise() {
@@ -98,7 +100,6 @@ function selectPixel(x: number, y: number) {
   let transform = fanZoom.value.getTransform();
   let scale = transform.scale;
   if (scale < MIN_ZOOM_SELECT) return;
-  console.log(scale);
   let transformedX = transform.x + x * scale;
   let transformedY = transform.y + y * scale;
 
@@ -109,6 +110,8 @@ function selectPixel(x: number, y: number) {
   console.log('selected pixel ' + x + ', ' + y);
   store.state.selectedPixelX = x;
   store.state.selectedPixelY = y;
+
+  setButtonPos(transformedX, transformedY, scale);
 
   enableSelector();
 }
@@ -133,15 +136,14 @@ const getColorFromData = (x: number, y: number, width: number, height: number, d
 function disableSelector() {
   if (!selector.value) return; //TODO
   selector.value?.classList.add("hidden")
+  buttonWrapper.value?.classList.add("hidden")
   store.state.selecting = false;
-  console.log("disableSelector");
   hideColorPalette();
 }
 
 function enableSelector() {
   selector.value?.classList.remove("hidden")
-  confirmationButton.value?.classList.remove("hidden")
-  console.log("enableSelector");
+  buttonWrapper.value?.classList.remove("hidden")
   store.state.selecting = true;
 
   showColorPalette();
@@ -161,6 +163,35 @@ function colorSelectedPixel() { // TODO: send pixel placement request
   confirmationButton.value?.setAttribute("disabled", "isDisabled");
   setCooldownTimeout();
   console.log("color x:", x, "y:", y);
+}
+
+function setButtonPos(x: number, y: number, scale: number) {
+  let bw = buttonWrapper.value;
+  if (!bw || !selector.value || !boardWrapper.value) return;
+  let buttonWidth = bw?.getBoundingClientRect().width;
+  let buttonHeight = bw?.getBoundingClientRect().height;
+  let selectorCenterX = x + (scale / 2);
+  let selectorCenterY = y + (scale / 2);
+  let boardWidth = boardWrapper.value.getBoundingClientRect().width;
+  let boardHeight = boardWrapper.value.getBoundingClientRect().height
+  let boardCenterX = boardWidth / 3 * 2;
+  let boardCenterY = boardHeight / 2;
+
+  // left right
+  if (selectorCenterX < boardCenterX) {                             // left
+    bw.style.left = (x + scale + (buttonWidth * 0.1)) + "px";
+  } else {                                                          // right
+    bw.style.left = (x - buttonWidth - (buttonWidth * 0.1)) + "px";
+  }
+
+  // top bottom
+  if (selectorCenterY - (buttonHeight / 2) < 0) {                   // top
+    bw.style.top = "0px";
+  } else if (selectorCenterY + (buttonHeight / 2) > boardHeight) {  // bottom
+    bw.style.top = (boardHeight - buttonHeight) + "px";
+  } else {
+    bw.style.top = (selectorCenterY - (buttonHeight / 2)) + "px";   // default
+  }
 }
 
 function sendPlacePixelRequest(x: number, y: number, color: string, boardId: number) { // TODO: session missing
@@ -271,8 +302,31 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
   height: 50px;;
   z-index: 10;
 
-  outline: 1px solid white;
+  outline: 5px solid white;
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+}
+
+.buttonWrapper {
+  position: absolute;
+  left: 0px;
+  height: 10%;
+  width: 10%;
+  z-index: 101;
+}
+
+.buttonWrapper button {
+  height: 100%;
+  width: 100%;
+  background-color: #545454; /* Green */
+  border: 4px solid #1e1e1e;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
 .hidden {
