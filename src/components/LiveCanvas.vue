@@ -54,18 +54,27 @@ const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a 
 
 
 onMounted(() => {
+    /*
   const socket = new WebSocket("ws://noucake.ddns.net:8080");
   socket.onmessage = handleWebSocketMessage;
+  */
 
   disableSelector();
   AzPlaceAPI.loadBoard();
 })
 
+
+let lastCanvas: any = null;
 watch(store.state, () => {
+  if(store.state.canvas && lastCanvas != store.state.canvas) {
+    lastCanvas = store.state.canvas;
+    nextTick().then(() => loadBoard(store.state.canvas))
+  }
   //TODO refactor
   if (!selector.value || !store.state.canvas) return;
   selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
   nextTick().then(initPanZoom);
+  
 })
 
 function initPanZoom() {
@@ -100,7 +109,7 @@ function loadBoard(board: Board) {
   for (let i = 0; i < board.width; i++) {
     for (let j = 0; j < board.height; j++) {
       const index = getColorFromData(i, j, board.width, board.height, board.initialData);
-      ctx.fillStyle = store.state.canvas.colors[/*index*/createNoise()].toString();
+      ctx.fillStyle = store.state.canvas.colors[index].toString();
       ctx.fillRect(i, j, 1, 1);
     }
   }

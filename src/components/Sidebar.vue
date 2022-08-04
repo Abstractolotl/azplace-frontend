@@ -98,10 +98,12 @@ const openNav = () => {
 }
 
 const closeNav = () => {
-    if (!sidebar.value || store.getters.isSelecting) {
+    if (!sidebar.value) {
         store.dispatch("pushError", { message: "UI: Internal Error (403)"})
         return;
     }
+
+    if(store.getters.isSelecting) return;
 
     sidebar.value.style.left = (WIDTH_HIDDEN - WIDTH_EXPANDED) + "px";
 

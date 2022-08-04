@@ -3,10 +3,63 @@ import { store } from "./store";
 import type { Board, StoreData } from "./types";
 
 const BASE_URL = "http://localhost:8080";
-const DEFAULT_BOARD_ID = 0;
+const DEFAULT_BOARD_ID = 2;
+
+const DEFAULT_REQUEST_HEADERS: RequestInit = {
+    credentials: "include",
+    
+}
+
+async function loadUser() {
+    const endpoint = BASE_URL + "/user/";
+
+    try {
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
+
+        if(!response.ok) {
+            throw response;
+        }
+
+        const profile = await response.json();
+        if(!profile || !profile.name) {
+            store.dispatch("pushError", { message: "Received bad data from Server"})
+            return;
+        }
+
+        store.state.user = {
+            name: profile.name,
+            avatarURL: ""
+        }
+
+    } catch (e) {
+        store.dispatch("pushError", { message: "Login Failed"})
+    }
+}
+
+async function doLogin() {
+    const endpoint = BASE_URL + "/test/loginAdmin";
+
+    try {
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
+
+        if(!response.ok) {
+            throw response;
+        }
+
+    } catch (e) {
+        store.dispatch("pushError", { message: "Login Failed"})
+    }
+}
 
 async function doLogout() {
+    const endpoint = BASE_URL + "/auth/logout";
 
+    try {
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
+        if(!response.ok) throw response;
+    } catch (e) {
+        store.dispatch("pushError", { message: "Logout Failed"})
+    }
 }
 
 async function loadBoard() {
@@ -17,6 +70,7 @@ async function loadBoard() {
         store.dispatch("pushError", { message: "Could not load Board"})
         return;
     }
+
 
     store.state.canvas = { 
         ...config,
@@ -29,10 +83,10 @@ async function loadBoardConfig() {
 
     try {
 
-        const response = await fetch(endpoint, { credentials: "include" })
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
         const boardConfig = await response.json();
-        if(!boardConfig || !boardConfig.width || !boardConfig.height || !boardConfig.colors || !boardConfig.cooldown) {
+        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return
         }
@@ -52,10 +106,10 @@ async function loadBoardConfig() {
 }
 
 async function loadBoardData() {
-    const endpoint = BASE_URL + "/board/" + DEFAULT_BOARD_ID + "/rawdata";
+    const endpoint = BASE_URL + "/board/" + DEFAULT_BOARD_ID + "/data";
 
     try {
-        const response = await fetch(endpoint, { credentials: "include" })
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
 
         return {
@@ -70,7 +124,19 @@ async function doPlace() {
     const endpoint = BASE_URL + "/board/" + DEFAULT_BOARD_ID + "/place";
 
     try {
-        const response = await fetch(endpoint, { credentials: "include" })
+        const response = await fetch(endpoint, {
+            ...DEFAULT_REQUEST_HEADERS,
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                x: store.state.selectedPixel?.x,
+                y: store.state.selectedPixel?.y,
+                colorIndex: store.state.selectedColorIndex
+            })
+        })
         if(!response.ok) throw response;
     } catch (e) {
         store.dispatch("pushError", { message: "Could not place Pixel"})
@@ -79,25 +145,10 @@ async function doPlace() {
     return true;
 }
 
-async function doLogin() {
-    const endpoint = BASE_URL + "/login";
-
-    try {
-        const response = await fetch(endpoint, { credentials: "include" })
-
-        if(!response.ok) {
-            throw response;
-        }
-    } catch (e) {
-        console.log("Got Some Error", e);
-        store.dispatch("pushError", { message: "Login Failed"})
-    }
-
-}
-
 export default {
     doLogin,
     doLogout,
     doPlace,
-    loadBoard
+    loadBoard,
+    loadUser
 }

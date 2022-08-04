@@ -34,6 +34,10 @@ defineProps({
   }
 })
 
+onMounted(() => {
+    AzPlaceAPI.loadUser();
+})
+
 const username = computed(() => {
     return store.state.user?.name.toString() || "USER NOT FOUND";
 })

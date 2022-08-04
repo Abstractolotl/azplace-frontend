@@ -26,7 +26,7 @@
 
 
 <script lang="ts" setup>
-import {nextTick, onMounted, ref} from "vue";
+import {nextTick, onMounted, onUnmounted, ref} from "vue";
 import {useStore} from "vuex";
 import type {StoreData} from "@/types";
 
@@ -52,17 +52,24 @@ const props = defineProps({
 
 const DIALOG_PADDING = 10;
 
+let intervalFunc;
+
 onMounted(() => {
-  setInterval(() => {
+  intervalFunc = setInterval(() => {
     cooldownText.value = calculateCooldownText();
-    nextTick().then(setDialogPosition);
+    nextTick().then(() => setDialogPosition());
   }, 1000);
-  nextTick().then(setDialogPosition);
+  nextTick().then(() => setDialogPosition());
+})
+
+
+onUnmounted(() => {
+    clearInterval(intervalFunc);
 })
 
 function onConfirmation() {
   emit("confirm");
-  nextTick().then(setDialogPosition);
+  nextTick().then(() => setDialogPosition());
 }
 
 function onCancel() {
@@ -77,7 +84,7 @@ const calculateCooldownText = () => {
   }
   const time = new Date((store.state.canvas.cooldown * 1000) - (Date.now() - store.state.lastTimePlaced))
   if (time.getTime() < 0) {
-    store.dispatch("pushError", { message: "UI: Internal Error (201)"})
+    //store.dispatch("pushError", { message: "UI: Internal Error (201)"})
     return "";
   }
 
@@ -87,16 +94,16 @@ const calculateCooldownText = () => {
 };
 
 function setDialogPosition() {
-  let dw = dialogWrapper.value;
-  if (!dw) {
+  if (!dialogWrapper.value) {
+    console.log(this, dialogWrapper);
     store.dispatch("pushError", { message: "UI: Internal Error (202)"})
     return;
   }
 
   const {x, y, pixelSize} = props;
 
-  const dialogWidth = dw.getBoundingClientRect().width;
-  const dialogHeight = dw.getBoundingClientRect().height;
+  const dialogWidth = dialogWrapper.value.getBoundingClientRect().width;
+  const dialogHeight = dialogWrapper.value.getBoundingClientRect().height;
   const selectorCenterX = x + (pixelSize / 2);
   const selectorCenterY = y + (pixelSize / 2);
   const boardWidth = window.innerWidth;
@@ -104,18 +111,18 @@ function setDialogPosition() {
 
   // left right
   if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
-    dw.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
+    dialogWrapper.value.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
   } else {                                                          // right
-    dw.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
+    dialogWrapper.value.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
   }
 
   // top bottom
   if (selectorCenterY - (dialogHeight / 2) < 0) {                   // top
-    dw.style.top = DIALOG_PADDING + "px";
+    dialogWrapper.value.style.top = DIALOG_PADDING + "px";
   } else if (selectorCenterY + (dialogHeight / 2) > boardHeight) {  // bottom
-    dw.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
+    dialogWrapper.value.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
   } else {
-    dw.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
+    dialogWrapper.value.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
   }
 }
 
