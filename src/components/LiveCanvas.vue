@@ -4,16 +4,16 @@
       class="board-wrapper"
   >
     <div ref="selector" class="selector">
-
-    </div>
-
-    <ConfirmationDialog 
+        <ConfirmationDialog 
         v-if="store.getters.isSelecting"
         @confirm="onConfirm"
         @cancel="onCancel"
-        v-bind="selectedPixelAbsolutePos"
-    />
-    
+        :x="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
+        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.y : 0"
+        :pixel-size="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 10"
+        />
+
+    </div>
     <div
         ref="board"
         class="board"

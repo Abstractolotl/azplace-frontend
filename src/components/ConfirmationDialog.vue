@@ -52,7 +52,7 @@ const props = defineProps({
 
 const DIALOG_PADDING = 10;
 
-let intervalFunc;
+let intervalFunc: any;
 
 onMounted(() => {
   intervalFunc = setInterval(() => {
