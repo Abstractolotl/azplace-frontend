@@ -9,7 +9,7 @@
         @confirm="onConfirm"
         @cancel="onCancel"
         :x="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
-        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.y : 0"
+        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
         :pixel-size="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 10"
         />
 
@@ -68,7 +68,7 @@ let lastCanvas: any = null;
 watch(store.state, () => {
   if(store.state.canvas && lastCanvas != store.state.canvas) {
     lastCanvas = store.state.canvas;
-    nextTick().then(() => loadBoard(store.state.canvas))
+    nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
   }
   //TODO refactor
   if (!selector.value || !store.state.canvas) return;
