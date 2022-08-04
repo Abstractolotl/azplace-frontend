@@ -1,24 +1,25 @@
-import { reactive } from "vue";
-
 export interface StoreData {
     canvas: Board | null,
+    user: User | null,
+    sidebar: Sidebar
     lastTimePlaced: number,
     selectedColorIndex: number,
+    errors: Array<{
+        message: string,
+        time: number
+    }>,
     selectedPixel: {
         x: number,
         y: number
     } | null,
-    sidebar: Sidebar
-    user: User | null,
-    randomNumber: String
 }
 
 export interface Board {
     width: number;
     height: number;
     colors: Array<String>;
-    initialData: CanvasData;
     cooldown: number;
+    initialData: CanvasData;
 }
 
 export interface CanvasData {
@@ -26,12 +27,12 @@ export interface CanvasData {
 }
 
 export interface User {
-    name: String,
-    avatarURL: String,
+    name: string,
+    avatarURL: string,
 }
 
 export interface Sidebar {
     expanded: Boolean,
-    panel: String,
+    panel: string,
     width: Number
 }

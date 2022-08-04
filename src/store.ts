@@ -1,8 +1,9 @@
+
+// @ts-nocheck 
+        
 import type { Board, StoreData } from "@/types";
 import { reactive } from "vue";
 import { createStore, Store } from "vuex";
-
-//Mock data
 
 export const store: Store<StoreData> = createStore({
     state: function() {
@@ -11,16 +12,13 @@ export const store: Store<StoreData> = createStore({
             lastTimePlaced: 0,
             selectedColorIndex: 0,
             selectedPixel: null,
-            user: {
-                name: 'Bobb',
-                avatarURL: 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg',
-            },
+            user: null,
             sidebar: {
                 expanded: false,
                 panel: "",
                 width: 250
             },
-            randomNumber: ""
+            errors: []
         }
     },
     getters: {
@@ -34,5 +32,11 @@ export const store: Store<StoreData> = createStore({
     mutations: {
     },
     actions: {
+        pushError: ({commit, state}, error) => {
+            state.errors.push({
+                message: error.message,
+                time: error.time || Date.now()
+            });
+        }
     },
 });

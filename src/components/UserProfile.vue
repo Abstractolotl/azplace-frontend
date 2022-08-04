@@ -20,6 +20,8 @@ import type { StoreData } from "@/types";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 
+import AzPlaceAPI from "@/api"
+
 const store = useStore<StoreData>();
 
 const DEFAULT_PROFILE = "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg";
@@ -41,24 +43,14 @@ const profile = computed(() => {
 })
 
 function logout() {
-    //TODO
-
-    //send logout to backend
+    AzPlaceAPI.doLogout();
     store.state.user = null;
 }
 
-function login() {
-    //TODO
-
-    // get user from backend
+async function login() {
     waitingForLogin.value = true;
-    setTimeout(() => {
-        waitingForLogin.value = false;
-        store.state.user = {
-            name: "Bobby",
-            avatarURL: "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg"
-        }
-    }, 2000)
+    await AzPlaceAPI.doLogin();
+    waitingForLogin.value = false;
 }
 
 </script>

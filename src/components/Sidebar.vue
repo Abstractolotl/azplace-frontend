@@ -53,7 +53,11 @@ function onNavigate(e: CustomEvent) {
 }
 
 function changeWidth(width: number) {
-    if(!sidebar.value || !content.value ) return; //TODO
+    if(!sidebar.value || !content.value ) {
+    store.dispatch("pushError", { message: "UI: Internal Error (401)"})
+    return;
+  }
+
     document.body.style.setProperty("--sidebar-width", width + "px");
 
     sidebar.value.style.width = width + "px";
@@ -64,7 +68,10 @@ function changeWidth(width: number) {
 }
 
 onMounted(() => {
-    if (!sidebar.value) return; //TODO
+    if (!sidebar.value)  {
+        store.dispatch("pushError", { message: "UI: Internal Error (400)"})
+        return;
+    }
 
     changeWidth(store.state.sidebar.width.valueOf());
 
@@ -80,14 +87,22 @@ onMounted(() => {
 })
 
 const openNav = () => {
-    if (!sidebar.value) return; //TODO
+    if (!sidebar.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (402)"})
+        return;
+    }
+
     sidebar.value.style.left = "0px";
 
     navbarOpen.value = true;
 }
 
 const closeNav = () => {
-    if (!sidebar.value || store.state.selecting) return; //TODO
+    if (!sidebar.value || store.getters.isSelecting) {
+        store.dispatch("pushError", { message: "UI: Internal Error (403)"})
+        return;
+    }
+
     sidebar.value.style.left = (WIDTH_HIDDEN - WIDTH_EXPANDED) + "px";
 
     navbarOpen.value = false;

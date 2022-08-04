@@ -49,17 +49,6 @@ const props = defineProps({
     required: true
   }
 });
-const calculateCooldownText = () => {
-  if (!store.state.canvas) return ""; // TODO: error handling
-  const time = new Date((store.state.canvas.cooldown * 1000) - (Date.now() - store.state.lastTimePlaced))
-  if (time.getTime() < 0) {
-    console.log("negative zeit");
-    return "";
-  }
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
-  return minutes + ":" + (seconds < 10 ? "0": "") + seconds
-};
 
 const DIALOG_PADDING = 10;
 
@@ -67,17 +56,9 @@ onMounted(() => {
   setInterval(() => {
     cooldownText.value = calculateCooldownText();
     nextTick().then(setDialogPosition);
-  }, 100);
+  }, 1000);
   nextTick().then(setDialogPosition);
 })
-
-function enable() {
-  dialogWrapper.value?.classList.remove("hidden")
-}
-
-function disable() {
-  dialogWrapper.value?.classList.add("hidden")
-}
 
 function onConfirmation() {
   emit("confirm");
@@ -89,9 +70,28 @@ function onCancel() {
   store.state.selectedPixel = null;
 }
 
+const calculateCooldownText = () => {
+  if (!store.state.canvas) {
+    store.dispatch("pushError", { message: "UI: Internal Error (200)"})
+    return "";
+  }
+  const time = new Date((store.state.canvas.cooldown * 1000) - (Date.now() - store.state.lastTimePlaced))
+  if (time.getTime() < 0) {
+    store.dispatch("pushError", { message: "UI: Internal Error (201)"})
+    return "";
+  }
+
+  const minutes = time.getMinutes();
+  const seconds = time.getSeconds();
+  return minutes + ":" + (seconds < 10 ? "0": "") + seconds
+};
+
 function setDialogPosition() {
   let dw = dialogWrapper.value;
-  if (!dw) return; // TODO: error handling
+  if (!dw) {
+    store.dispatch("pushError", { message: "UI: Internal Error (202)"})
+    return;
+  }
 
   const {x, y, pixelSize} = props;
 
@@ -101,22 +101,6 @@ function setDialogPosition() {
   const selectorCenterY = y + (pixelSize / 2);
   const boardWidth = window.innerWidth;
   const boardHeight = window.innerHeight;
-
-  // // left right
-  // if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
-  //   dw.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
-  // } else {                                                          // right
-  //   dw.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
-  // }
-  //
-  // // top bottom
-  // if (selectorCenterY - (dialogHeight / 2) < 0) {                   // top
-  //   dw.style.top = DIALOG_PADDING + "px";
-  // } else if (selectorCenterY + (dialogHeight / 2) > boardHeight) {  // bottom
-  //   dw.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
-  // } else {
-  //   dw.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
-  // }
 
   // left right
   if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
@@ -139,6 +123,7 @@ function setDialogPosition() {
 
 
 <style lang="scss">
+
 .dialogWrapper {
   position: absolute;
   left: 0px;
@@ -146,7 +131,7 @@ function setDialogPosition() {
   z-index: 101;
   background-color: white;
   border-radius: 3px;
-  box-shadow: 2px 2px 10px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   padding: 10px 15px;
