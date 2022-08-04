@@ -8,18 +8,9 @@ export const store: Store<StoreData> = createStore({
     state: function() {
         return {
             canvas: null,
-            canvasInfo: {
-                id: 0,
-                width: 10,
-                height: 10,
-                cooldown: 10,
-                colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"]
-            },
             lastTimePlaced: 0,
             selectedColorIndex: 0,
-            selectedPixelX: -1,
-            selectedPixelY: -1,
-            selecting: false,
+            selectedPixel: null,
             user: {
                 name: 'Bobb',
                 avatarURL: 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg',
@@ -33,10 +24,12 @@ export const store: Store<StoreData> = createStore({
         }
     },
     getters: {
-        canvasWidth: state => state.canvasInfo?.width,
-        canvasHeight: state => state.canvasInfo?.height,
-        user: state => state.user,
         loggedIn: state => !!state.user,
+        isOnCooldown: state => {
+            if (!state.canvas) return true;
+            return state.lastTimePlaced + (state.canvas.cooldown * 1000) > Date.now();
+        },
+        isSelecting: state => !!state.selectedPixel
     },
     mutations: {
     },

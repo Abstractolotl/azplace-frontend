@@ -1,33 +1,44 @@
 <template>
-  <div ref="boardWrapper" class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown" @mouseup="onMouseUp">
+  <div
+      ref="boardWrapper"
+      class="board-wrapper"
+  >
     <div ref="selector" class="selector">
 
     </div>
-    <div ref="buttonWrapper" class="buttonWrapper hidden">
-      <button ref="confirmationButton" type="button">Place</button>
-    </div>
-    <div ref="board" class="board">
-      <canvas v-if="store.state.canvasInfo.width !== 0" ref="htmlCanvas"></canvas>
+    <confirmation-dialog
+        v-if="store.getters.isSelecting"
+        @confirm="onConfirm"
+        @cancel="onCancel"
+        v-bind="selectedPixelAbsolutePos"
+    />
+    <div
+        ref="board"
+        class="board"
+        @wheel="onMouseWheel"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+    >
+      <canvas v-if="store.state.canvas" ref="htmlCanvas"></canvas>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 
-import type {Board, StoreData} from "@/types";
-import {onMounted, ref, watch} from "vue";
+import type {Board, CanvasData, StoreData} from "@/types";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {Store, useStore} from "vuex";
 import panzoom, {type PanZoom} from "panzoom";
 import axios from "axios";
 import config from "@/config.json";
+import ConfirmationDialog from "@/components/ConfirmationDialog.vue";
 
 const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
-const buttonWrapper = ref<HTMLElement>();
 const boardWrapper = ref<HTMLElement>();
-const confirmationButton = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 
 const MIN_ZOOM_SELECT = 8;
@@ -37,21 +48,6 @@ const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a 
 
 
 onMounted(() => {
-  if (!board.value || !htmlCanvas.value) return; //TODO
-
-  let zoomOptions = {
-    smoothScroll: false,
-    initialZoom: 3,
-    minZoom: MIN_ZOOM,
-    maxZoom: MAX_ZOOM,
-    zoomDoubleClickSpeed: 1
-  };
-
-  fanZoom.value = panzoom(board.value, zoomOptions);
-  fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
-
-  confirmationButton.value?.addEventListener("click", colorSelectedPixel);
-
   loadMockData();
 
   const socket = new WebSocket("ws://noucake.ddns.net:8080");
@@ -64,7 +60,38 @@ watch(store.state, () => {
   //TODO refactor
   if (!selector.value || !store.state.canvas) return;
   selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+  nextTick().then(initPanZoom);
 })
+
+const selectedPixelAbsolutePos = computed(() => {
+  if (!fanZoom.value || !store.state.selectedPixel) return; // TODO: error handling
+
+  let transform = fanZoom.value.getTransform();
+  let scale = transform.scale;
+  let transformedX = transform.x + store.state.selectedPixel.x * scale;
+  let transformedY = transform.y + store.state.selectedPixel.y * scale;
+  return {
+    x: transformedX,
+    y: transformedY,
+    pixelSize: scale
+  };
+});
+
+function initPanZoom() {
+  if (fanZoom.value) return;
+  if (!board.value || !htmlCanvas.value) return; //TODO
+
+  let zoomOptions = {
+    smoothScroll: false,
+    initialZoom: 3,
+    minZoom: MIN_ZOOM,
+    maxZoom: MAX_ZOOM,
+    zoomDoubleClickSpeed: 1
+  };
+
+  fanZoom.value = panzoom(board.value, zoomOptions);
+  fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
+}
 
 function loadBoard(board: Board) {
   if (!htmlCanvas.value || !htmlCanvas.value || !store.state.canvas) return; //TODO
@@ -76,7 +103,7 @@ function loadBoard(board: Board) {
   for (let i = 0; i < board.width; i++) {
     for (let j = 0; j < board.height; j++) {
       const index = getColorFromData(i, j, board.width, board.height, board.initialData);
-      ctx.fillStyle = store.state.canvasInfo.colors[/*index*/createNoise()].toString();
+      ctx.fillStyle = store.state.canvas.colors[/*index*/createNoise()].toString();
       ctx.fillRect(i, j, 1, 1);
     }
   }
@@ -84,8 +111,8 @@ function loadBoard(board: Board) {
 
 function handleWebSocketMessage(event: MessageEvent) {
   let message = JSON.parse(event.data);
-  if (!message.x || !message.y || !message.colorIndex) return;
-  setPixel(message.x, message.y, store.state.canvasInfo.colors[message.colorIndex].toString());
+  if (!message.x || !message.y || !message.colorIndex || !store.state.canvas) return;
+  setPixel(message.x, message.y, store.state.canvas.colors[message.colorIndex].toString());
 }
 
 function createNoise() {
@@ -94,7 +121,7 @@ function createNoise() {
 
 function selectPixel(x: number, y: number) {
   if (!selector.value || !fanZoom.value || !store.state.canvas) return; //TODO
-  if (x < 0 || y < 0 || x >= store.state.canvasInfo.width || y >= store.state.canvasInfo.height) return {x: -1, y: -1}; //TODO
+  if (x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return;
 
 
   let transform = fanZoom.value.getTransform();
@@ -108,91 +135,63 @@ function selectPixel(x: number, y: number) {
   selector.value.style.width = scale + "px"
   selector.value.style.height = scale + "px";
   console.log('selected pixel ' + x + ', ' + y);
-  store.state.selectedPixelX = x;
-  store.state.selectedPixelY = y;
-
-  setButtonPos(transformedX, transformedY, scale);
+  store.state.selectedPixel = {x, y};
+  //setButtonPos(transformedX, transformedY, scale);
 
   enableSelector();
 }
 
-function loadMockData() {
-  setTimeout(() => {
-    store.state.canvas = {
-      width: store.state.canvasInfo.width,
-      height: store.state.canvasInfo.height,
-      colors: store.state.canvasInfo.colors,
-      initialData: Uint8Array.from([1, 3, 1, 3, 3, 1, 3, 1, 1, 3, 1, 3, 3, 1, 3, 1])
-    }
-
-    loadBoard(store.state.canvas);
-  }, 1000)
-}
-
-const getColorFromData = (x: number, y: number, width: number, height: number, data: Uint8Array) => {
-  return data[y * width + x];
-}
-
-function disableSelector() {
-  if (!selector.value) return; //TODO
-  selector.value?.classList.add("hidden")
-  buttonWrapper.value?.classList.add("hidden")
-  store.state.selecting = false;
+function onCancel() {
+  disableSelector();
   hideColorPalette();
 }
 
-function enableSelector() {
-  selector.value?.classList.remove("hidden")
-  buttonWrapper.value?.classList.remove("hidden")
-  store.state.selecting = true;
-
-  showColorPalette();
-}
-
-function colorSelectedPixel() { // TODO: send pixel placement request
-  if (isOnCooldown()) return
-  let x = store.state.selectedPixelX;
-  let y = store.state.selectedPixelY;
-  let color = store.state.canvasInfo.colors[store.state.selectedColorIndex].toString();
+function onConfirm() { // TODO: send pixel placement request
+  if (store.getters.isOnCooldown) return
+  if (!store.state.canvas || !store.state.selectedPixel) return; // TODO: error handling
+  let x = store.state.selectedPixel.x;
+  let y = store.state.selectedPixel.y;
+  let color = store.state.canvas.colors[store.state.selectedColorIndex].toString();
   setPixel(x, y, color);
   let boardId = 1;
 
   sendPlacePixelRequest(x, y, color, boardId)
 
   store.state.lastTimePlaced = Date.now(); // TODO: get from backend
-  confirmationButton.value?.setAttribute("disabled", "isDisabled");
   setCooldownTimeout();
   console.log("color x:", x, "y:", y);
 }
 
-function setButtonPos(x: number, y: number, scale: number) {
-  let bw = buttonWrapper.value;
-  if (!bw || !selector.value || !boardWrapper.value) return;
+function loadMockData() {
+  setTimeout(() => {
+    store.state.canvas = {
+      width: 256,
+      height: 256,
+      colors: ["#ff0000", "#939393", "#ffffff"],
+      initialData: {
+        pixels: Uint8Array.from([1, 3, 1, 3, 3, 1, 3, 1, 1, 3, 1, 3, 3, 1, 3, 1])
+      },
+      cooldown: 120
+    }
 
-  let buttonWidth = bw.getBoundingClientRect().width;
-  let buttonHeight = bw.getBoundingClientRect().height;
-  let selectorCenterX = x + (scale / 2);
-  let selectorCenterY = y + (scale / 2);
-  let boardWidth = boardWrapper.value.getBoundingClientRect().width;
-  let boardHeight = boardWrapper.value.getBoundingClientRect().height
-  let boardCenterX = boardWidth / 3 * 2;
-  let boardCenterY = boardHeight / 2;
+    loadBoard(store.state.canvas);
+  }, 1000)
+}
 
-  // left right
-  if (selectorCenterX < boardCenterX) {                             // left
-    bw.style.left = (x + scale + (buttonWidth * 0.1)) + "px";
-  } else {                                                          // right
-    bw.style.left = (x - buttonWidth - (buttonWidth * 0.1)) + "px";
-  }
+const getColorFromData = (x: number, y: number, width: number, height: number, data: CanvasData) => {
+  return data.pixels[y * width + x];
+}
 
-  // top bottom
-  if (selectorCenterY - (buttonHeight / 2) < 0) {                   // top
-    bw.style.top = "0px";
-  } else if (selectorCenterY + (buttonHeight / 2) > boardHeight) {  // bottom
-    bw.style.top = (boardHeight - buttonHeight) + "px";
-  } else {
-    bw.style.top = (selectorCenterY - (buttonHeight / 2)) + "px";   // default
-  }
+function disableSelector() { // TODO: confirmation dialog
+  if (!selector.value) return; //TODO
+  selector.value?.classList.add("hidden");
+  store.state.selectedPixel = null;
+  hideColorPalette();
+}
+
+function enableSelector() { // TODO: confirmation dialog
+  selector.value?.classList.remove("hidden");
+  showColorPalette();
 }
 
 function sendPlacePixelRequest(x: number, y: number, color: string, boardId: number) { // TODO: session missing
@@ -210,16 +209,11 @@ function sendPlacePixelRequest(x: number, y: number, color: string, boardId: num
 }
 
 function setCooldownTimeout() {
-  let cooldown = store.state.canvasInfo.cooldown * 1000;
+  if (!store.state.canvas) return; // TODO: error handling
+  let cooldown = store.state.canvas.cooldown * 1000;
   setTimeout(() => {
-    if (isOnCooldown()) return;
-    confirmationButton.value?.removeAttribute("disabled");
+    if (store.getters.isOnCooldown) return;
   }, cooldown)
-}
-
-function isOnCooldown() {
-  let cooldown = store.state.canvasInfo.cooldown * 1000;
-  return store.state.lastTimePlaced + cooldown > Date.now();
 }
 
 function updateLastTimePlaced() { // TODO: implement with actual endpoint
@@ -246,11 +240,13 @@ function showColorPalette() {
 }
 
 function hideColorPalette() {
+  document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
 }
 
 const mouseDownPos = ref({x: 0, y: 0})
 
 function onMouseDown(e: MouseEvent) {
+  console.log(e.srcElement);
   mouseDownPos.value = {x: e.x, y: e.y};
   disableSelector();
 }
@@ -262,8 +258,7 @@ function onMouseUp(e: MouseEvent) {
 		if(!pos) return;
 		selectPixel(pos.x, pos.y)
 	} else {
-		//TODO remove hard coded width
-		document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
+    hideColorPalette()
 	}
 }
 
@@ -307,31 +302,8 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 }
 
-.buttonWrapper {
-  position: absolute;
-  left: 0px;
-  height: 10%;
-  width: 10%;
-  z-index: 101;
-}
-
-.buttonWrapper button {
-  height: 100%;
-  width: 100%;
-  background-color: #545454; /* Green */
-  border: 4px solid #1e1e1e;
-  color: white;
-  padding: 5px 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 25px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-}
-
 .hidden {
-  opacity: 0;
+  display: none;
 }
 
 canvas {

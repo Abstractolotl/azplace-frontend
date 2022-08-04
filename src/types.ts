@@ -2,14 +2,14 @@ import { reactive } from "vue";
 
 export interface StoreData {
     canvas: Board | null,
-    canvasInfo: CanvasInfo,
     lastTimePlaced: number,
     selectedColorIndex: number,
-    selectedPixelX: number,
-    selectedPixelY: number,
+    selectedPixel: {
+        x: number,
+        y: number
+    } | null,
     sidebar: Sidebar
     user: User | null,
-    selecting: Boolean
     randomNumber: String
 }
 
@@ -17,20 +17,12 @@ export interface Board {
     width: number;
     height: number;
     colors: Array<String>;
-    initialData: Uint8Array;
+    initialData: CanvasData;
+    cooldown: number;
 }
 
-
-export interface CanvasInfo {
-    id: number,
-    width: number,
-    height: number,
-    cooldown: number
-    colors: Array<String>
-}
-
-export interface Canvas {
-    colors: Array<Uint8Array>
+export interface CanvasData {
+    pixels: Uint8Array;
 }
 
 export interface User {
