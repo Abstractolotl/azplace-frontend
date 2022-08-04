@@ -95,7 +95,6 @@ const calculateCooldownText = () => {
 
 function setDialogPosition() {
   if (!dialogWrapper.value) {
-    console.log(this, dialogWrapper);
     store.dispatch("pushError", { message: "UI: Internal Error (202)"})
     return;
   }
