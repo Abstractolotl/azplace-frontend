@@ -1,160 +1,300 @@
 <template>
-  <div class="board-wrapper" @wheel="onMouseWheel" @mousedown="onMouseDown">
-    <div ref="selector" class="selector"></div>
-    <div ref="board" class="board" @mouseup="onMouseUp">
-      <canvas ref="htmlCanvas"></canvas>
+  <div
+      ref="boardWrapper"
+      class="board-wrapper"
+  >
+    <div ref="selector" class="selector">
+        <ConfirmationDialog 
+        v-if="store.getters.isSelecting"
+        @confirm="onConfirm"
+        @cancel="onCancel"
+        :x="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
+        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.y : 0"
+        :pixel-size="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 10"
+        />
+
+    </div>
+    <div
+        ref="board"
+        class="board"
+        @wheel="onMouseWheel"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+    >
+      <canvas v-if="store.state.canvas" ref="htmlCanvas"></canvas>
+      <div v-else class="loading">
+            <span>Loading Board</span> 
+            <div class="loader"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 
-import type {StoreData, Board} from "@/types";
-import {onMounted, ref, watch} from "vue";
+import type {Board, CanvasData, StoreData} from "@/types";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {Store, useStore} from "vuex";
-import panzoom, { type PanZoom } from "panzoom";
+import panzoom, {type PanZoom} from "panzoom";
+import AzPlaceAPI from "@/api.js";
+import ConfirmationDialog from "./ConfirmationDialog.vue";
 
 const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
-const colorButton = ref<HTMLElement>();
+const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
+const mouseDownPos = ref({x: 0, y: 0})
+
+const MIN_ZOOM_SELECT = 8;
+const MIN_ZOOM = 3;
+const MAX_ZOOM = 140;
+const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
 
 
 onMounted(() => {
-	if (!board.value) return; //TODO
+    /*
+  const socket = new WebSocket("ws://noucake.ddns.net:8080");
+  socket.onmessage = handleWebSocketMessage;
+  */
 
-
-	fanZoom.value = panzoom(board.value, {smoothScroll: false})
-	fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
-	loadMockData();
-	disableSelector();
+  disableSelector();
+  AzPlaceAPI.loadBoard();
 })
 
+
+let lastCanvas: any = null;
 watch(store.state, () => {
-	if(!selector.value || !store.state.canvas) return;
-	selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+  if(store.state.canvas && lastCanvas != store.state.canvas) {
+    lastCanvas = store.state.canvas;
+    nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
+  }
+  //TODO refactor
+  if (!selector.value || !store.state.canvas) return;
+  selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+  nextTick().then(initPanZoom);
+  
 })
+
+function initPanZoom() {
+  if (fanZoom.value) return;
+  if (!board.value || !htmlCanvas.value) {
+    store.dispatch("pushError", { message: "UI: Internal Error (302)"})
+    return;
+  }
+
+  let zoomOptions = {
+    smoothScroll: false,
+    initialZoom: 3,
+    minZoom: MIN_ZOOM,
+    maxZoom: MAX_ZOOM,
+    zoomDoubleClickSpeed: 1
+  };
+
+  fanZoom.value = panzoom(board.value, zoomOptions);
+  fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
+}
 
 function loadBoard(board: Board) {
-	if (!htmlCanvas.value) return; //TODO
+  if (!htmlCanvas.value || !htmlCanvas.value || !store.state.canvas) {
+    store.dispatch("pushError", { message: "UI: Internal Error (301)"})
+    return;
+  }
 
-	let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
-	for (let i = 0; i < board.width; i++) {
-		for (let j = 0; j < board.height; j++) {
-			const index = getColorFromData(i, j, board.width, board.height, board.initialData);
-			ctx.fillStyle = store.state.canvas.colors[index].toString();
-			ctx.fillRect(i, j, 1, 1);
-		}
-	}	
+  htmlCanvas.value.width = store.state.canvas.width;
+  htmlCanvas.value.height = store.state.canvas.height;
+
+  let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
+  for (let i = 0; i < board.width; i++) {
+    for (let j = 0; j < board.height; j++) {
+      const index = getColorFromData(i, j, board.width, board.height, board.initialData);
+      ctx.fillStyle = store.state.canvas.colors[index].toString();
+      ctx.fillRect(i, j, 1, 1);
+    }
+  }
+}
+
+const selectedPixelAbsolutePos = computed(() => {
+  if (!fanZoom.value || !store.state.selectedPixel) {
+    store.dispatch("pushError", { message: "UI: Internal Error (300)"})
+    return;
+  }
+
+  let transform = fanZoom.value.getTransform();
+  let scale = transform.scale;
+  let transformedX = transform.x + store.state.selectedPixel.x * scale;
+  let transformedY = transform.y + store.state.selectedPixel.y * scale;
+  return {
+    x: transformedX,
+    y: transformedY,
+    pixelSize: scale
+  };
+});
+
+function handleWebSocketMessage(event: MessageEvent) {
+  let message = JSON.parse(event.data);
+  if (!message.x || !message.y || !message.colorIndex || !store.state.canvas) return;
+  setPixel(message.x, message.y, store.state.canvas.colors[message.colorIndex].toString());
 }
 
 function selectPixel(x: number, y: number) {
-  	if (!selector.value || !fanZoom.value) return; //TODO
-	if(x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return {x: -1, y: -1}; //TODO
+  if (!selector.value || !fanZoom.value || !store.state.canvas) {
+    store.dispatch("pushError", { message: "UI: Internal Error (303)"})
+    return;
+  }
+  if (x < 0 || y < 0 || x >= store.state.canvas.width || y >= store.state.canvas.height) return;
 
 
-    let transform = fanZoom.value.getTransform();
-    let scale = transform.scale;
-    let transformedX = transform.x + x * scale;
-    let transformedY = transform.y + y * scale;
+  let transform = fanZoom.value.getTransform();
+  let scale = transform.scale;
+  if (scale < MIN_ZOOM_SELECT) return;
+  let transformedX = transform.x + x * scale;
+  let transformedY = transform.y + y * scale;
 
-	selector.value.style.left = transformedX + "px";
-	selector.value.style.top = transformedY + "px";
-	selector.value.style.width = scale + "px"
-	selector.value.style.height = scale + "px";
-	enableSelector();
+  selector.value.style.left = transformedX + "px";
+  selector.value.style.top = transformedY + "px";
+  selector.value.style.width = scale + "px"
+  selector.value.style.height = scale + "px";
+  store.state.selectedPixel = {x, y};
+
+  enableSelector();
 }
 
-function loadMockData() {
-	setTimeout(() => {
-	store.state.canvas = {
-		width: 4,
-		height: 4,
-		colors: ["#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff00ff"],
-		initialData: Uint8Array.from([1,3,1,3,3,1,3,1,1,3,1,3,3,1,3,1])
-	}
-
-	loadBoard(store.state.canvas);
-  }, 1000)
+function onCancel() {
+  disableSelector();
+  hideColorPalette();
 }
 
-const getColorFromData = (x: number, y: number, width: number, height: number, data: Uint8Array) => {
-  return data[y * width + x];
+function onConfirm() {
+  if (store.getters.isOnCooldown) return;
+
+  if (!store.state.canvas || !store.state.selectedPixel) {
+    store.dispatch("pushError", { message: "UI: Internal Error (304)"})
+    return;
+  }
+  
+  let x = store.state.selectedPixel.x;
+  let y = store.state.selectedPixel.y;
+  let color = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+
+  store.state.lastTimePlaced = Date.now(); // TODO: get from backend
+
+  setPixel(x, y, color);
+  setCooldownTimeout();
+  
+  AzPlaceAPI.doPlace();
+}
+
+const getColorFromData = (x: number, y: number, width: number, height: number, data: CanvasData) => {
+  return data.pixels[y * width + x];
 }
 
 function disableSelector() {
-  	selector.value?.classList.add("hidden")
-	store.state.selecting = false;
-
-	hideColorPalette();
+  if (!selector.value) {
+    store.dispatch("pushError", { message: "UI: Internal Error (305)"})
+    return;
+  }
+  selector.value?.classList.add("hidden");
+  store.state.selectedPixel = null;
 }
 
 function enableSelector() {
-  	selector.value?.classList.remove("hidden")
-	store.state.selecting = true;
-
-	showColorPalette();
+  selector.value?.classList.remove("hidden");
+  showColorPalette();
 }
 
-function colorSelectedPixel () {
+function setCooldownTimeout() {
+  if (!store.state.canvas) {
+    store.dispatch("pushError", { message: "UI: Internal Error (306)"})
+    return;
+  }
+  let cooldown = store.state.canvas.cooldown * 1000;
+  setTimeout(() => {
+    if (store.getters.isOnCooldown) return;
+  }, cooldown)
+}
+
+function setPixel(x: number, y: number, color: string) {
+  if (!htmlCanvas) return;
   if (!htmlCanvas.value) return;
   let ctx = htmlCanvas.value.getContext("2d") as CanvasRenderingContext2D;
-
-  console.log("color")
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, 1, 1);
 }
 
 function showColorPalette() {
-    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "palette", width: 250, forceOpen: true}}))
+  document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "palette", width: 250, forceOpen: true}}))
 }
 
 function hideColorPalette() {
+  document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
 }
 
-const mouseDownPos = ref({x: 0, y: 0})
 
 function onMouseDown(e: MouseEvent) {
-	mouseDownPos.value = {x: e.x, y: e.y};
-	disableSelector();
+  mouseDownPos.value = {x: e.x, y: e.y};
+  disableSelector();
 }
 
 function onMouseUp(e: MouseEvent) {
 	const distToMouseDown  = Math.sqrt( (e.x - mouseDownPos.value.x) * (e.x - mouseDownPos.value.x) + (e.y - mouseDownPos.value.y) * (e.y - mouseDownPos.value.y) )
-	if(distToMouseDown < 50) {
+	if(distToMouseDown < MAX_MOUSE_MOVE) {
 		const pos = getBoardCoordsFromMousePos(e.x, e.y);
 		if(!pos) return;
 		selectPixel(pos.x, pos.y)
 	} else {
-		document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250, forceClose: false}}))
+    hideColorPalette()
 	}
 }
 
 function onMouseWheel() {
-	console.log(123);
 	disableSelector();
 }
 
-function getBoardCoordsFromMousePos(x:number, y:number) {
-	if(!htmlCanvas.value) return ; //TODO
+function getBoardCoordsFromMousePos(x: number, y: number) {
+  if (!htmlCanvas.value) {
+    store.dispatch("pushError", { message: "UI: Internal Error (306)"})
+    return;
+  }
 
-    const rect = htmlCanvas.value.getBoundingClientRect();
-    let boardX = Math.floor(((x - rect.left) / (rect.right - rect.left)) * htmlCanvas.value.width)
-    let boardY = Math.floor(((y - rect.top) / (rect.bottom - rect.top)) * htmlCanvas.value.height)
-	return {x: boardX, y: boardY}
+  const rect = htmlCanvas.value.getBoundingClientRect();
+  let boardX = Math.floor(((x - rect.left) / (rect.right - rect.left)) * htmlCanvas.value.width)
+  let boardY = Math.floor(((y - rect.top) / (rect.bottom - rect.top)) * htmlCanvas.value.height)
+  return {x: boardX, y: boardY}
 }
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 .board-wrapper {
-	height: 100%;
-	width: 100%;
-	background-color: lightgray;
-	overflow: hidden;
+  height: 100%;
+  width: 100%;
+  background-color: lightgray;
+  overflow: hidden;
 
-	position: relative;
+  position: relative;
+}
+
+.loading {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column;
+    gap: 20px;
+    color: white;
+
+    $width: 250px;
+    $height: 150px;
+    position: absolute;
+    left: calc(50% - $width * 0.5);
+    top: calc(50% - $height * 0.5);
+    width: $width;
+    height: $height;
+
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
 .selector {
@@ -167,23 +307,13 @@ function getBoardCoordsFromMousePos(x:number, y:number) {
   height: 50px;;
   z-index: 10;
 
-  outline: 1px solid white;
-  box-shadow: 0px 0px 10px 5px rgba(0,0,0, 0.25);
-}
-
-.colorButton {
-  position: absolute;
-  top: 800px;
-  left: 125px;
-
-  width: 50px;
-  height: 50px;;
-  background-color: rgba(1,0,0,1);
-  z-index: 200;
+  outline: 5px solid white;
+  border: 0.5px solid black;
+  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 }
 
 .hidden {
-  opacity: 0;
+  display: none;
 }
 
 canvas {
@@ -194,5 +324,19 @@ canvas {
   image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
   image-rendering: pixelated; /* Awesome future-browsers       */
   -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+}
+
+.loader {
+    border: 4px solid #f3f3f3; /* Light grey */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>

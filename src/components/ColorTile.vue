@@ -26,12 +26,18 @@ function onColorClicked() {
 }
 
 function initColorFromStore() {
-    if(props.colorIndex < 0 && props.colorIndex >= 16) console.log("TODO: Error");
+    if (!store.state.canvas) return;
+    if(props.colorIndex < 0 && props.colorIndex >= 16) {
+        store.dispatch("pushError", { message: "UI: Internal Error (100)"})
+        return;
+    }
 
     const canvas = store.state.canvas;
-    if( !canvas  || !canvas.colors  || canvas.colors.length <= props.colorIndex) console.log("TODO: Error");
+    if( !canvas  || !canvas.colors  || canvas.colors.length <= props.colorIndex || !colorTile.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (101)"})
+        return;
+    }
 
-    if(!colorTile.value) return;
     colorTile.value.style.backgroundColor = store.state.canvas.colors[props.colorIndex].toString();
 }
 
@@ -60,6 +66,7 @@ onMounted(() => {
     right: 2px;
     top: 2px;
     bottom: 2px;
+    border: 0.5px solid black;
 }
 
 </style>

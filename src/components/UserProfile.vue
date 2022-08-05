@@ -20,6 +20,8 @@ import type { StoreData } from "@/types";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 
+import AzPlaceAPI from "@/api"
+
 const store = useStore<StoreData>();
 
 const DEFAULT_PROFILE = "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg";
@@ -32,6 +34,10 @@ defineProps({
   }
 })
 
+onMounted(() => {
+    AzPlaceAPI.loadUser();
+})
+
 const username = computed(() => {
     return store.state.user?.name.toString() || "USER NOT FOUND";
 })
@@ -41,24 +47,14 @@ const profile = computed(() => {
 })
 
 function logout() {
-    //TODO
-
-    //send logout to backend
+    AzPlaceAPI.doLogout();
     store.state.user = null;
 }
 
-function login() {
-    //TODO
-
-    // get user from backend
+async function login() {
     waitingForLogin.value = true;
-    setTimeout(() => {
-        waitingForLogin.value = false;
-        store.state.user = {
-            name: "Bobby",
-            avatarURL: "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg"
-        }
-    }, 2000)
+    await AzPlaceAPI.doLogin();
+    waitingForLogin.value = false;
 }
 
 </script>
@@ -85,12 +81,12 @@ $profile-size: 40px;
         }
     }
 
-    $image-padding: 0px;
+    $image-padding: 5px;
     > img:first-of-type {
 
         position: absolute;
         border-radius: 50%;
-        left: calc($sidebar-max-width - $profile-size);
+        left: calc($sidebar-max-width - $profile-size - $image-padding * 2);
         transition: $sidebar-expand-time;
 
         width: $profile-size;
@@ -111,6 +107,7 @@ $profile-size: 40px;
     &.expanded > img:first-of-type {
         left: $image-padding;
     }
+
     > *:not(img) {
         opacity: 0;
         transition: $sidebar-expand-time;
@@ -135,6 +132,7 @@ $profile-size: 40px;
 
     &.expanded > img {
         opacity: 0;
+        right: 50%;
     }
 
     > img {
@@ -144,7 +142,7 @@ $profile-size: 40px;
         position: absolute;
         right: $sidebar-hidden-width * 0.5 - $icon-height * 0.5;
         
-        transition: $sidebar-expand-time * 0.5;
+        transition: $sidebar-expand-time * 0.75;
         opacity: 1;
     }
 

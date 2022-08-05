@@ -1,26 +1,26 @@
 <template>
     <div ref="sidebar" class="sidebar">
-        <div class="expand-hint"><span :class="{ hidden: navbarOpen }">></span></div>
         <UserProfile :expanded="navbarOpen" />
         
-        <Page v-if="store.state.sidebar.panel === 'palette'" title="Color Palette">
-            <div class="palette" :class="{ hidden: !navbarOpen }">
-                <div v-for="(color, index) in store.state.canvas?.colors">
-                    <ColorTile :color-index="index" />
+        <div ref="content" :class="{ hidden: !navbarOpen }" class="content">
+            <Page v-if="store.state.sidebar.panel === 'palette'" title="Color Palette">
+                <div class="palette" :class="{ hidden: !navbarOpen }">
+                    <div v-for="(color, index) in store.state.canvas?.colors">
+                        <ColorTile :color-index="index" />
+                    </div>
                 </div>
-            </div>
-        </Page>
-        <Page v-else-if="store.state.sidebar.panel === 'aboutus'" title="About Us"> <AboutUsPanel /></Page>
-        <Page v-else-if="store.state.sidebar.panel === 'impressum'" title="Impressum"> <ImpressumPanel /></Page>
-        <WelcomePanel v-else />
-
+            </Page>
+            <Page v-else-if="store.state.sidebar.panel === 'aboutus'" title="About Us"> <AboutUsPanel /></Page>
+            <Page v-else-if="store.state.sidebar.panel === 'impressum'" title="Impressum"> <ImpressumPanel /></Page>
+            <WelcomePanel v-else />
+        </div>
         <FooterPanel />
     </div>
 </template>
 
 <script setup lang="ts">
 import type { StoreData } from "@/types";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import ColorTile from "./ColorTile.vue";
 import UserProfile from "./UserProfile.vue";
@@ -32,6 +32,7 @@ import ImpressumPanel from "./ImpressumPanel.vue";
 
 const store = useStore<StoreData>();
 const sidebar = ref<HTMLElement>();
+const content = ref<HTMLElement>();
 
 let WIDTH_EXPANDED = 250;
 const WIDTH_HIDDEN = 25;
@@ -39,7 +40,6 @@ const WIDTH_HIDDEN = 25;
 let navbarOpen = ref(false);
 
 function onNavigate(e: CustomEvent) {
-    console.log(e.detail)
     const page = e.detail.page;
     const width = e.detail.width;
 
@@ -53,20 +53,27 @@ function onNavigate(e: CustomEvent) {
 }
 
 function changeWidth(width: number) {
-    if(!sidebar.value) return;
+    if(!sidebar.value || !content.value ) {
+    store.dispatch("pushError", { message: "UI: Internal Error (401)"})
+    return;
+  }
+
     document.body.style.setProperty("--sidebar-width", width + "px");
 
-    console.log(12312312312);
     sidebar.value.style.width = width + "px";
     WIDTH_EXPANDED = width;
+
+    const scale = width / 250;
+    content.value.style.transform = `scale(${scale})`;
 }
 
 onMounted(() => {
-    if (!sidebar.value) return; //TODO
+    if (!sidebar.value)  {
+        store.dispatch("pushError", { message: "UI: Internal Error (400)"})
+        return;
+    }
 
-
-    changeWidth(store.state.sidebar.width);
-    //sidebar.value.style.width = WIDTH_EXPANDED + "px";
+    changeWidth(store.state.sidebar.width.valueOf());
 
     closeNav();
     document.addEventListener("mousemove", e => {
@@ -74,20 +81,30 @@ onMounted(() => {
     })
     sidebar.value.addEventListener("mouseleave", closeNav);
 
-
+    //@ts-ignore
     document.addEventListener("navigate", onNavigate)
     
 })
 
 const openNav = () => {
-    if (!sidebar.value) return; //TODO
+    if (!sidebar.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (402)"})
+        return;
+    }
+
     sidebar.value.style.left = "0px";
 
     navbarOpen.value = true;
 }
 
 const closeNav = () => {
-    if (!sidebar.value || store.state.selecting) return; //TODO
+    if (!sidebar.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (403)"})
+        return;
+    }
+
+    if(store.getters.isSelecting) return;
+
     sidebar.value.style.left = (WIDTH_HIDDEN - WIDTH_EXPANDED) + "px";
 
     navbarOpen.value = false;
@@ -98,19 +115,43 @@ const closeNav = () => {
 @use "../variables.scss" as *;
 
 .sidebar {
-    height: 100%;
+    height: 100vh;
     position: fixed;
     z-index: 100;
     top: 0;
     left: 0;
     background-color: #111;
-    overflow-x: hidden;
+    overflow: hidden;
     transition: $sidebar-expand-time;
     color: white;
-
+    
     display: flex;
     flex-direction: column;
+
+
+    .content {
+        opacity: 1;
+        transition: 0.5s;
+
+        //position: absolute;
+        //left: 0;
+        //top: 50px;
+        transform-origin: top left;
+
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        width: 250px;
+        transform: scale(1);
+    }
+
+    .hidden {
+        opacity: 0;
+    }
+
 }
+
+
 
 .expand-hint {
     color: white;
@@ -139,4 +180,5 @@ const closeNav = () => {
 .hidden {
     opacity: 0;
 }
+
 </style>
