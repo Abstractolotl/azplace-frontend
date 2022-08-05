@@ -21,14 +21,15 @@ async function loadUser() {
         }
 
         const profile = await response.json();
-        if(!profile || !profile.name) {
+        console.log(profile);
+        if(!profile || !profile.name || !profile.person_id) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
 
         store.state.user = {
             name: profile.name,
-            avatarURL: ""
+            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id
         }
 
     } catch (e) {
@@ -37,8 +38,18 @@ async function loadUser() {
 }
 
 async function doLogin() {
-    const endpoint = BASE_URL + "/auth/login";
-    window.location.href = endpoint
+    const endpoint = BASE_URL + "/test/loginAdmin";
+
+    try {
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
+
+        if(!response.ok) {
+            throw response;
+        }
+
+    } catch (e) {
+        store.dispatch("pushError", { message: "Login Failed"})
+    }
 }
 
 async function doLogout() {
@@ -55,8 +66,6 @@ async function doLogout() {
 async function loadBoard() {
     const config = await loadBoardConfig();
     const data = await loadBoardData();
-
-    console.log(data);
 
     if(!config || !data) {
         store.dispatch("pushError", { message: "Could not load Board"})
@@ -126,7 +135,7 @@ async function doPlace() {
             body: JSON.stringify({
                 x: store.state.selectedPixel?.x,
                 y: store.state.selectedPixel?.y,
-                color_index: store.state.selectedColorIndex
+                colorIndex: store.state.selectedColorIndex
             })
         })
         if(!response.ok) throw response;

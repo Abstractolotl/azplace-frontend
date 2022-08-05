@@ -165,8 +165,6 @@ function onCancel() {
 }
 
 function onConfirm() {
-  if (store.getters.isOnCooldown) return;
-
   if (!store.state.canvas || !store.state.selectedPixel) {
     store.dispatch("pushError", { message: "UI: Internal Error (304)"})
     return;
@@ -179,8 +177,6 @@ function onConfirm() {
   store.state.lastTimePlaced = Date.now(); // TODO: get from backend
 
   setPixel(x, y, color);
-  setCooldownTimeout();
-  
   AzPlaceAPI.doPlace();
 }
 
@@ -200,17 +196,6 @@ function disableSelector() {
 function enableSelector() {
   selector.value?.classList.remove("hidden");
   showColorPalette();
-}
-
-function setCooldownTimeout() {
-  if (!store.state.canvas) {
-    store.dispatch("pushError", { message: "UI: Internal Error (306)"})
-    return;
-  }
-  let cooldown = store.state.canvas.cooldown * 1000;
-  setTimeout(() => {
-    if (store.getters.isOnCooldown) return;
-  }, cooldown)
 }
 
 function setPixel(x: number, y: number, color: string) {

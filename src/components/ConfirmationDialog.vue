@@ -79,7 +79,7 @@ const updateCooldown = () => {
     }
 
     const timeSincePlaced = Date.now() - store.state.lastTimePlaced;
-    const cooldownLeft = Math.max(0, (store.state.canvas.cooldown * 1000) - timeSincePlaced);
+    const cooldownLeft = Math.max(0, store.state.canvas.cooldown - timeSincePlaced);
 
     isCooldown.value = cooldownLeft > 0;
     
@@ -192,7 +192,7 @@ function updateDialogPosition() {
       border-radius: 3px;
     }
 
-    &:active {
+    &:active:hover:not([disabled])  {
       background-color: lightgray;
     }
 
