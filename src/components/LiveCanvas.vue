@@ -178,6 +178,12 @@ function onConfirm() {
 
   setPixel(x, y, color);
   AzPlaceAPI.doPlace();
+  store.state.cachedPixelOwner.set(x+"|"+y, {
+    username: store.state.user?.name,
+    avatarURL: store.state.user?.avatarURL,
+    timestamp: Date.now(),
+    anonym: false
+  })
 }
 
 const getColorFromData = (x: number, y: number, width: number, height: number, data: CanvasData) => {

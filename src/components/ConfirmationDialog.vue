@@ -107,6 +107,7 @@ onUnmounted(() => {
 
 function onConfirmation() {
   emit("confirm");
+  store.state.selectedPixel = null;
 }
 
 function onCancel() {
