@@ -23,12 +23,6 @@ export const store: Store<StoreData> = createStore({
     },
     getters: {
         loggedIn: state => !!state.user,
-        
-        /*isOnCooldown: state => {
-            console.log(!!state.canvas, Date.now() - state.lastTimePlaced, (state.canvas.cooldown * 1000), Date.now() - state.lastTimePlaced < state.canvas.cooldown * 1000)
-            if (!state.canvas) return true;
-            return Date.now() - state.lastTimePlaced < (state.canvas.cooldown * 1000);
-        },*/
         isSelecting: state => !!state.selectedPixel
     },
     mutations: {
