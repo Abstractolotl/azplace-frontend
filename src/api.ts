@@ -10,6 +10,19 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
     
 }
 
+let socket: WebSocket | null;
+
+function setWebSocketHandler(handler: (event: MessageEvent) => {}) {
+    socket = new WebSocket("ws://noucake.ddns.net:8080");
+    socket.addEventListener("message", handler);
+    socket.addEventListener("close", () => {
+        store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+    })
+    socket.addEventListener("error", () => {
+        store.dispatch("pushError", { message: "Error with WebSocket connection"})
+    })
+}
+
 async function loadUser() {
     const endpoint = BASE_URL + "/user/";
 
@@ -151,5 +164,6 @@ export default {
     doLogout,
     doPlace,
     loadBoard,
-    loadUser
+    loadUser,
+    setWebSocketHandler
 }

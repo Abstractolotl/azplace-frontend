@@ -53,15 +53,17 @@ const MAX_ZOOM = 140;
 const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
 
 
-onMounted(() => {
-    /*
-  const socket = new WebSocket("ws://noucake.ddns.net:8080");
-  socket.onmessage = handleWebSocketMessage;
-  */
-
-  disableSelector();
-  AzPlaceAPI.loadBoard();
+onMounted(async () => {
+    disableSelector();
+    await AzPlaceAPI.loadBoard();
+    AzPlaceAPI.setWebSocketHandler(handleWebSocketMessage)
 })
+
+function handleWebSocketMessage(event: MessageEvent) {
+  let message = JSON.parse(event.data);
+  if (!message.x || !message.y || !message.colorIndex || !store.state.canvas) return;
+  setPixel(message.x, message.y, store.state.canvas.colors[message.colorIndex].toString());
+}
 
 
 let lastCanvas: any = null;
@@ -131,12 +133,6 @@ const selectedPixelAbsolutePos = computed(() => {
     pixelSize: scale
   };
 });
-
-function handleWebSocketMessage(event: MessageEvent) {
-  let message = JSON.parse(event.data);
-  if (!message.x || !message.y || !message.colorIndex || !store.state.canvas) return;
-  setPixel(message.x, message.y, store.state.canvas.colors[message.colorIndex].toString());
-}
 
 function selectPixel(x: number, y: number) {
   if (!selector.value || !fanZoom.value || !store.state.canvas) {
