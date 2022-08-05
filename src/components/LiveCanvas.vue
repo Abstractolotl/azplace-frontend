@@ -5,13 +5,14 @@
       class="board-wrapper"
   >
     <div ref="selector" class="selector">
+        <div ref="selectorBg"></div>
     </div>
-        <ConfirmationDialog 
-            v-if="store.getters.isSelecting"
-            @confirm="onConfirm"
-            @cancel="onCancel"
-            v-bind="selectedPixelAbsolutePos"
-        />
+    <ConfirmationDialog 
+        v-if="store.getters.isSelecting"
+        @confirm="onConfirm"
+        @cancel="onCancel"
+        v-bind="selectedPixelAbsolutePos"
+    />
     <div
         ref="board"
         class="board"
@@ -41,6 +42,7 @@ const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
+const selectorBg = ref<HTMLElement>();
 const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({x: 0, y: 0})
@@ -69,8 +71,8 @@ watch(store.state, () => {
     nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
   }
   //TODO refactor
-  if (!selector.value || !store.state.canvas) return;
-  selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+  if (!selectorBg.value || !store.state.canvas) return;
+  selectorBg.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
   nextTick().then(initPanZoom);
   
 })
@@ -165,6 +167,8 @@ function onCancel() {
 }
 
 function onConfirm() {
+  if (store.getters.isOnCooldown) return;
+
   if (!store.state.canvas || !store.state.selectedPixel) {
     store.dispatch("pushError", { message: "UI: Internal Error (304)"})
     return;
@@ -281,7 +285,6 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
 }
 
 .selector {
-
   position: absolute;
   top: 100px;
   left: 125px;
@@ -290,9 +293,24 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
   height: 50px;;
   z-index: 10;
 
-  outline: 5px solid white;
+  outline: 3px solid white;
   border: 0.5px solid black;
+box-sizing: border-box;
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+
+    $corner-size: 25%;
+  > div {
+    width: calc(100% + 0px);
+    height: calc(100% + 0px);
+    clip-path: polygon(
+        0% 0%,
+        100% 0%,
+        100% (100% - $corner-size),
+        (100% - $corner-size) 100%,
+        0% 100%,
+    );
+  }
+
 }
 
 .hidden {
