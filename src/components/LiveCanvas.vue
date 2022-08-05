@@ -16,7 +16,6 @@
     <div
         ref="board"
         class="board"
-        @wheel="onMouseWheel"
         @mousedown="onMouseDown"
         @mouseup="onMouseUp"
     >
@@ -63,6 +62,7 @@ function handleWebSocketMessage(event: MessageEvent) {
   let message = JSON.parse(event.data);
   if (!message.x || !message.y || !message.color_index || !store.state.canvas) return;
   setPixel(message.x, message.y, store.state.canvas.colors[message.color_index].toString());
+  store.state.cachedPixelOwner.set(message.x+"|"+message.y, null)
 }
 
 
@@ -95,6 +95,9 @@ function initPanZoom() {
   };
 
   fanZoom.value = panzoom(board.value, zoomOptions);
+  fanZoom.value.on("panstart", disableSelector);
+  fanZoom.value.on("zoom", disableSelector);
+  fanZoom.value.on("transform", disableSelector);
   fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
 }
 
@@ -178,6 +181,13 @@ function onConfirm() {
 
   setPixel(x, y, color);
   AzPlaceAPI.doPlace();
+  disableSelector();
+  store.state.cachedPixelOwner.set(x+"|"+y, {
+    username: store.state.user?.name,
+    avatarURL: store.state.user?.avatarURL,
+    timestamp: Date.now(),
+    anonym: false
+  })
 }
 
 const getColorFromData = (x: number, y: number, width: number, height: number, data: CanvasData) => {
@@ -229,10 +239,6 @@ function onMouseUp(e: MouseEvent) {
 	} else {
     hideColorPalette()
 	}
-}
-
-function onMouseWheel() {
-	disableSelector();
 }
 
 function getBoardCoordsFromMousePos(x: number, y: number) {

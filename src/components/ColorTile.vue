@@ -56,6 +56,7 @@ onMounted(() => {
 
     &.selected {
         background-color: white;
+        outline: 3px solid white;
     }
 }
 
@@ -67,6 +68,7 @@ onMounted(() => {
     top: 2px;
     bottom: 2px;
     border: 0.5px solid black;
+    outline: 0.5px solid white;
 }
 
 </style>

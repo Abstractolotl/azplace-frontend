@@ -24,7 +24,7 @@
         <img src="@/assets/timer.svg">
         <div>
             <span> {{ cooldownText }} </span>
-            <div class="loading-bar"> </div>
+            <div class="loading-bar" :style="'width:' + loadingBarWidth "> </div>
         </div>
     </div>
 
@@ -44,6 +44,7 @@ const dialogWrapper = ref<HTMLElement>();
 const cooldownText = ref<string>("");
 const isCooldown = ref<boolean>(false);
 const owner = ref<any>();
+const loadingBarWidth = ref<string>("0%");
 
 const emit = defineEmits(["confirm", "cancel"]);
 const props = defineProps({
@@ -107,6 +108,7 @@ onUnmounted(() => {
 
 function onConfirmation() {
   emit("confirm");
+  store.state.selectedPixel = null;
 }
 
 function onCancel() {
@@ -127,6 +129,8 @@ const updateCooldown = () => {
     
     const minutes = Math.floor(cooldownLeft / (60 * 1000));
     const seconds = Math.floor(cooldownLeft / 1000);
+
+    loadingBarWidth.value = (cooldownLeft / store.state.canvas.cooldown) * 100 + "%";
 
     cooldownText.value = minutes + ":" + (seconds < 10 ? "0": "") + seconds;
 };
