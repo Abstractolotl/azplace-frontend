@@ -3,7 +3,7 @@ import { store } from "./store";
 import type { Board, StoreData } from "./types";
 
 const BASE_URL = "https://api.azplace.azubi.server.lan";
-const DEFAULT_BOARD_ID = 2;
+const DEFAULT_BOARD_ID = 1;
 
 const DEFAULT_REQUEST_HEADERS: RequestInit = {
     credentials: "include",
