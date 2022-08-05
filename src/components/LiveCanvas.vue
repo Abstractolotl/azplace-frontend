@@ -1,19 +1,17 @@
+// @ts-nocheck
 <template>
   <div
       ref="boardWrapper"
       class="board-wrapper"
   >
     <div ref="selector" class="selector">
-        <ConfirmationDialog 
-        v-if="store.getters.isSelecting"
-        @confirm="onConfirm"
-        @cancel="onCancel"
-        :x="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
-        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.y : 0"
-        :pixel-size="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 10"
-        />
-
     </div>
+        <ConfirmationDialog 
+            v-if="store.getters.isSelecting"
+            @confirm="onConfirm"
+            @cancel="onCancel"
+            v-bind="selectedPixelAbsolutePos"
+        />
     <div
         ref="board"
         class="board"

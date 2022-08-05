@@ -1,27 +1,21 @@
 <template>
-  <div ref="dialogWrapper" class="dialogWrapper">
-    <div v-if="store.getters.isOnCooldown">
-      <img src="@/assets/timer.svg">
-      <span>
-        {{ cooldownText }}
-      </span>
+<div ref="dialogWrapper" class="dialogWrapper">
+
+    <div class="cooldown-box" v-if="isCooldown">
+        <img src="@/assets/timer.svg">
+        <span> {{ cooldownText }} </span>
     </div>
+
     <div>
-      <button
-          :disabled="store.getters.isOnCooldown"
-          type="button"
-          @click="onConfirmation"
-      >
-        <img src="@/assets/done.svg">
-      </button>
-      <button
-          type="button"
-          @click="onCancel"
-      >
-        <img src="@/assets/close.svg">
-      </button>
+        <button :disabled="isCooldown" type="button" @click="onConfirmation" >
+            <img src="@/assets/done.svg">
+        </button>
+        <button type="button" @click="onCancel" >
+            <img src="@/assets/close.svg">
+        </button>
     </div>
-  </div>
+
+</div>
 </template>
 
 
@@ -29,10 +23,12 @@
 import {nextTick, onMounted, onUnmounted, ref} from "vue";
 import {useStore} from "vuex";
 import type {StoreData} from "@/types";
+import { computed } from "@vue/reactivity";
 
 const store = useStore<StoreData>();
 const dialogWrapper = ref<HTMLElement>();
-const cooldownText = ref<String>("");
+const cooldownText = ref<string>("");
+const isCooldown = ref<boolean>(false);
 
 const emit = defineEmits(["confirm", "cancel"]);
 const props = defineProps({
@@ -50,16 +46,16 @@ const props = defineProps({
   }
 });
 
-const DIALOG_PADDING = 10;
+const DIALOG_PADDING = 15;
 
 let intervalFunc: any;
 
 onMounted(() => {
-  intervalFunc = setInterval(() => {
-    cooldownText.value = calculateCooldownText();
-    nextTick().then(() => setDialogPosition());
-  }, 1000);
-  nextTick().then(() => setDialogPosition());
+    updateCooldown();
+    nextTick().then(() => updateDialogPosition())
+    intervalFunc = setInterval(() => {
+        updateCooldown();
+    }, 1000);
 })
 
 
@@ -69,7 +65,6 @@ onUnmounted(() => {
 
 function onConfirmation() {
   emit("confirm");
-  nextTick().then(() => setDialogPosition());
 }
 
 function onCancel() {
@@ -77,23 +72,24 @@ function onCancel() {
   store.state.selectedPixel = null;
 }
 
-const calculateCooldownText = () => {
-  if (!store.state.canvas) {
-    store.dispatch("pushError", { message: "UI: Internal Error (200)"})
-    return "";
-  }
-  const time = new Date((store.state.canvas.cooldown * 1000) - (Date.now() - store.state.lastTimePlaced))
-  if (time.getTime() < 0) {
-    //store.dispatch("pushError", { message: "UI: Internal Error (201)"})
-    return "";
-  }
+const updateCooldown = () => {
+    if (!store.state.canvas) {
+        store.dispatch("pushError", { message: "UI: Internal Error (200)"})
+        return "";
+    }
 
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
-  return minutes + ":" + (seconds < 10 ? "0": "") + seconds
+    const timeSincePlaced = Date.now() - store.state.lastTimePlaced;
+    const cooldownLeft = Math.max(0, (store.state.canvas.cooldown * 1000) - timeSincePlaced);
+
+    isCooldown.value = cooldownLeft > 0;
+    
+    const minutes = Math.floor(cooldownLeft / (60 * 1000));
+    const seconds = Math.floor(cooldownLeft / 1000);
+
+    cooldownText.value = minutes + ":" + (seconds < 10 ? "0": "") + seconds;
 };
 
-function setDialogPosition() {
+function updateDialogPosition() {
   if (!dialogWrapper.value) {
     store.dispatch("pushError", { message: "UI: Internal Error (202)"})
     return;
@@ -108,6 +104,17 @@ function setDialogPosition() {
   const boardWidth = window.innerWidth;
   const boardHeight = window.innerHeight;
 
+
+    let left = pixelSize * 0.5 + DIALOG_PADDING;
+    dialogWrapper.value.style.transform = "translate(0, -50%)"
+
+    if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 >= boardWidth) {
+        left *= -1;
+        dialogWrapper.value.style.transform = "translate(-100%, -50%)"
+    }
+    dialogWrapper.value.style.left = selectorCenterX + left  + "px";
+    dialogWrapper.value.style.top = selectorCenterY + "px";
+/*
   // left right
   if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
     dialogWrapper.value.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
@@ -123,6 +130,7 @@ function setDialogPosition() {
   } else {
     dialogWrapper.value.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
   }
+  */
 }
 
 </script>
@@ -143,7 +151,7 @@ function setDialogPosition() {
   padding: 10px 15px;
   gap: 5px;
 
-  > :first-child {
+  > .cooldown-box {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -190,7 +198,6 @@ function setDialogPosition() {
 
     &[disabled] {
       filter: grayscale(1);
-      background-color: #f0f0f0;
     }
 
     &:first-of-type > img {

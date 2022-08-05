@@ -82,6 +82,13 @@ $profile-size: 40px;
     }
 
     $image-padding: 5px;
+    > span {
+        margin-left: calc($profile-size + $image-padding * 3);
+        margin-right: calc(15px + $icon-height);
+        padding: 0px 5px;
+        text-align: center;
+    }
+
     > img:first-of-type {
 
         position: absolute;
