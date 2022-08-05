@@ -37,18 +37,8 @@ async function loadUser() {
 }
 
 async function doLogin() {
-    const endpoint = BASE_URL + "/test/loginAdmin";
-
-    try {
-        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
-
-        if(!response.ok) {
-            throw response;
-        }
-
-    } catch (e) {
-        store.dispatch("pushError", { message: "Login Failed"})
-    }
+    const endpoint = BASE_URL + "/auth/login";
+    window.location.href = endpoint
 }
 
 async function doLogout() {
@@ -65,6 +55,8 @@ async function doLogout() {
 async function loadBoard() {
     const config = await loadBoardConfig();
     const data = await loadBoardData();
+
+    console.log(data);
 
     if(!config || !data) {
         store.dispatch("pushError", { message: "Could not load Board"})
@@ -134,7 +126,7 @@ async function doPlace() {
             body: JSON.stringify({
                 x: store.state.selectedPixel?.x,
                 y: store.state.selectedPixel?.y,
-                colorIndex: store.state.selectedColorIndex
+                color_index: store.state.selectedColorIndex
             })
         })
         if(!response.ok) throw response;
