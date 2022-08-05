@@ -12,8 +12,8 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
 
 let socket: WebSocket | null;
 
-function setWebSocketHandler(handler: (event: MessageEvent) => {}) {
-    socket = new WebSocket("ws://noucake.ddns.net:8080");
+function setWebSocketHandler(handler: any) {
+    socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
     socket.addEventListener("message", handler);
     socket.addEventListener("close", () => {
         store.dispatch("pushError", { message: "Connection to WebSocket lost"})
@@ -51,18 +51,8 @@ async function loadUser() {
 }
 
 async function doLogin() {
-    const endpoint = BASE_URL + "/test/loginAdmin";
-
-    try {
-        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
-
-        if(!response.ok) {
-            throw response;
-        }
-
-    } catch (e) {
-        store.dispatch("pushError", { message: "Login Failed"})
-    }
+    const endpoint = BASE_URL + "/auth/login";
+    window.location.href = endpoint;
 }
 
 async function doLogout() {
