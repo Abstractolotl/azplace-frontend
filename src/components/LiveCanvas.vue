@@ -181,6 +181,7 @@ function onConfirm() {
 
   setPixel(x, y, color);
   AzPlaceAPI.doPlace();
+  disableSelector();
   store.state.cachedPixelOwner.set(x+"|"+y, {
     username: store.state.user?.name,
     avatarURL: store.state.user?.avatarURL,
@@ -226,6 +227,7 @@ function hideColorPalette() {
 
 function onMouseDown(e: MouseEvent) {
   mouseDownPos.value = {x: e.x, y: e.y};
+  disableSelector();
 }
 
 function onMouseUp(e: MouseEvent) {

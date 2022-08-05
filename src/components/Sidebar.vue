@@ -4,11 +4,7 @@
         
         <div ref="content" :class="{ hidden: !navbarOpen }" class="content">
             <Page v-if="store.state.sidebar.panel === 'palette'" title="Color Palette">
-                <div class="palette" :class="{ hidden: !navbarOpen }">
-                    <div v-for="(color, index) in store.state.canvas?.colors">
-                        <ColorTile :color-index="index" />
-                    </div>
-                </div>
+                <ColorPalette />
             </Page>
             <Page v-else-if="store.state.sidebar.panel === 'aboutus'" title="About Us"> <AboutUsPanel /></Page>
             <Page v-else-if="store.state.sidebar.panel === 'impressum'" title="Impressum"> <ImpressumPanel /></Page>
@@ -29,6 +25,7 @@ import FooterPanel from "./FooterPanel.vue";
 import AboutUsPanel from "./AboutUsPanel.vue";
 import Page from "./Page.vue";
 import ImpressumPanel from "./ImpressumPanel.vue";
+import ColorPalette from "./error/ColorPalette.vue";
 
 const store = useStore<StoreData>();
 const sidebar = ref<HTMLElement>();
@@ -166,17 +163,6 @@ const closeNav = () => {
         transition: 0.25s;
     }
 }
-
-.palette {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 10px;
-
-    transition: 0.25s;
-}
-
 .hidden {
     opacity: 0;
 }
