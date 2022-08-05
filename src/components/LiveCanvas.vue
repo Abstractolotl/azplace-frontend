@@ -61,8 +61,8 @@ onMounted(async () => {
 
 function handleWebSocketMessage(event: MessageEvent) {
   let message = JSON.parse(event.data);
-  if (!message.x || !message.y || !message.colorIndex || !store.state.canvas) return;
-  setPixel(message.x, message.y, store.state.canvas.colors[message.colorIndex].toString());
+  if (!message.x || !message.y || !message.color_index || !store.state.canvas) return;
+  setPixel(message.x, message.y, store.state.canvas.colors[message.color_index].toString());
 }
 
 
