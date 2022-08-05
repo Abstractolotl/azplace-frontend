@@ -18,7 +18,8 @@ export const store: Store<StoreData> = createStore({
                 panel: "",
                 width: 250
             },
-            errors: []
+            errors: [],
+            cachedPixelOwner: new Map()
         }
     },
     getters: {

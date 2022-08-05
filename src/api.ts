@@ -109,6 +109,37 @@ async function loadBoardConfig() {
 
 }
 
+async function requestPixel(x: number, y: number) {
+    const endpoint = BASE_URL + "/board/" + DEFAULT_BOARD_ID + "/pixel/" + x + "/" + y;
+
+    try {
+        const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
+        if(!response.ok) throw response;
+        const pixelInfo = await response.json();
+
+        if(response.status == 404) {
+            return null;
+        }
+
+        if(!pixelInfo || !pixelInfo.username || !pixelInfo.person_id) {
+            store.dispatch("pushError", { message: "Received bad data from Server"})
+            return;
+        }
+
+        return {
+            anonym: pixelInfo.username === "anonymous",
+            username: pixelInfo.username,
+            timestamp: pixelInfo.timestamp,
+            avatarURL: "https://image.azubi.server.lan/picture/" + pixelInfo.person_id
+        }
+
+    } catch (e) {
+        store.dispatch("pushError", { message: "Could not Pixel Info"})
+        return;
+    }
+
+}
+
 async function loadBoardData() {
     const endpoint = BASE_URL + "/board/" + DEFAULT_BOARD_ID + "/data";
 
@@ -155,5 +186,6 @@ export default {
     doPlace,
     loadBoard,
     loadUser,
-    setWebSocketHandler
+    setWebSocketHandler,
+    requestPixel
 }
