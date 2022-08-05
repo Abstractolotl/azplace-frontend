@@ -3,11 +3,24 @@ import { store } from "./store";
 import type { Board, StoreData } from "./types";
 
 const BASE_URL = "https://api.azplace.azubi.server.lan";
-const DEFAULT_BOARD_ID = 2;
+const DEFAULT_BOARD_ID = 1;
 
 const DEFAULT_REQUEST_HEADERS: RequestInit = {
     credentials: "include",
     
+}
+
+let socket: WebSocket | null;
+
+function setWebSocketHandler(handler: any) {
+    socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
+    socket.addEventListener("message", handler);
+    socket.addEventListener("close", () => {
+        store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+    })
+    socket.addEventListener("error", () => {
+        store.dispatch("pushError", { message: "Error with WebSocket connection"})
+    })
 }
 
 async function loadUser() {
@@ -21,14 +34,15 @@ async function loadUser() {
         }
 
         const profile = await response.json();
-        if(!profile || !profile.name) {
+        console.log(profile);
+        if(!profile || !profile.name || !profile.person_id) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
 
         store.state.user = {
             name: profile.name,
-            avatarURL: ""
+            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id
         }
 
     } catch (e) {
@@ -38,7 +52,7 @@ async function loadUser() {
 
 async function doLogin() {
     const endpoint = BASE_URL + "/auth/login";
-    window.location.href = endpoint
+    window.location.href = endpoint;
 }
 
 async function doLogout() {
@@ -55,8 +69,6 @@ async function doLogout() {
 async function loadBoard() {
     const config = await loadBoardConfig();
     const data = await loadBoardData();
-
-    console.log(data);
 
     if(!config || !data) {
         store.dispatch("pushError", { message: "Could not load Board"})
@@ -142,5 +154,6 @@ export default {
     doLogout,
     doPlace,
     loadBoard,
-    loadUser
+    loadUser,
+    setWebSocketHandler
 }

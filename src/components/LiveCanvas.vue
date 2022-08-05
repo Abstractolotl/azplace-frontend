@@ -5,13 +5,14 @@
       class="board-wrapper"
   >
     <div ref="selector" class="selector">
+        <div ref="selectorBg"></div>
     </div>
-        <ConfirmationDialog 
-            v-if="store.getters.isSelecting"
-            @confirm="onConfirm"
-            @cancel="onCancel"
-            v-bind="selectedPixelAbsolutePos"
-        />
+    <ConfirmationDialog 
+        v-if="store.getters.isSelecting"
+        @confirm="onConfirm"
+        @cancel="onCancel"
+        v-bind="selectedPixelAbsolutePos"
+    />
     <div
         ref="board"
         class="board"
@@ -40,6 +41,7 @@ const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
 const board = ref<HTMLElement>();
 const selector = ref<HTMLElement>();
+const selectorBg = ref<HTMLElement>();
 const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({x: 0, y: 0})
@@ -50,15 +52,17 @@ const MAX_ZOOM = 140;
 const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
 
 
-onMounted(() => {
-    /*
-  const socket = new WebSocket("ws://noucake.ddns.net:8080");
-  socket.onmessage = handleWebSocketMessage;
-  */
-
-  disableSelector();
-  AzPlaceAPI.loadBoard();
+onMounted(async () => {
+    disableSelector();
+    await AzPlaceAPI.loadBoard();
+    AzPlaceAPI.setWebSocketHandler(handleWebSocketMessage)
 })
+
+function handleWebSocketMessage(event: MessageEvent) {
+  let message = JSON.parse(event.data);
+  if (!message.x || !message.y || !message.color_index || !store.state.canvas) return;
+  setPixel(message.x, message.y, store.state.canvas.colors[message.color_index].toString());
+}
 
 
 let lastCanvas: any = null;
@@ -68,8 +72,8 @@ watch(store.state, () => {
     nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
   }
   //TODO refactor
-  if (!selector.value || !store.state.canvas) return;
-  selector.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
+  if (!selectorBg.value || !store.state.canvas) return;
+  selectorBg.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
   nextTick().then(initPanZoom);
   
 })
@@ -132,12 +136,6 @@ const selectedPixelAbsolutePos = computed(() => {
   };
 });
 
-function handleWebSocketMessage(event: MessageEvent) {
-  let message = JSON.parse(event.data);
-  if (!message.x || !message.y || !message.colorIndex || !store.state.canvas) return;
-  setPixel(message.x, message.y, store.state.canvas.colors[message.colorIndex].toString());
-}
-
 function selectPixel(x: number, y: number) {
   if (!selector.value || !fanZoom.value || !store.state.canvas) {
     store.dispatch("pushError", { message: "UI: Internal Error (303)"})
@@ -181,8 +179,6 @@ function onConfirm() {
   store.state.lastTimePlaced = Date.now(); // TODO: get from backend
 
   setPixel(x, y, color);
-  setCooldownTimeout();
-  
   AzPlaceAPI.doPlace();
 }
 
@@ -202,17 +198,6 @@ function disableSelector() {
 function enableSelector() {
   selector.value?.classList.remove("hidden");
   showColorPalette();
-}
-
-function setCooldownTimeout() {
-  if (!store.state.canvas) {
-    store.dispatch("pushError", { message: "UI: Internal Error (306)"})
-    return;
-  }
-  let cooldown = store.state.canvas.cooldown * 1000;
-  setTimeout(() => {
-    if (store.getters.isOnCooldown) return;
-  }, cooldown)
 }
 
 function setPixel(x: number, y: number, color: string) {
@@ -293,7 +278,6 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
 }
 
 .selector {
-
   position: absolute;
   top: 100px;
   left: 125px;
@@ -302,9 +286,24 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
   height: 50px;;
   z-index: 10;
 
-  outline: 5px solid white;
+  outline: 3px solid white;
   border: 0.5px solid black;
+box-sizing: border-box;
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+
+    $corner-size: 25%;
+  > div {
+    width: calc(100% + 0px);
+    height: calc(100% + 0px);
+    clip-path: polygon(
+        0% 0%,
+        100% 0%,
+        100% (100% - $corner-size),
+        (100% - $corner-size) 100%,
+        0% 100%,
+    );
+  }
+
 }
 
 .hidden {
