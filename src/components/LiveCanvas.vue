@@ -16,7 +16,6 @@
     <div
         ref="board"
         class="board"
-        @wheel="onMouseWheel"
         @mousedown="onMouseDown"
         @mouseup="onMouseUp"
     >
@@ -96,6 +95,9 @@ function initPanZoom() {
   };
 
   fanZoom.value = panzoom(board.value, zoomOptions);
+  fanZoom.value.on("panstart", disableSelector);
+  fanZoom.value.on("zoom", disableSelector);
+  fanZoom.value.on("transform", disableSelector);
   fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
 }
 
@@ -224,7 +226,6 @@ function hideColorPalette() {
 
 function onMouseDown(e: MouseEvent) {
   mouseDownPos.value = {x: e.x, y: e.y};
-  disableSelector();
 }
 
 function onMouseUp(e: MouseEvent) {
@@ -236,10 +237,6 @@ function onMouseUp(e: MouseEvent) {
 	} else {
     hideColorPalette()
 	}
-}
-
-function onMouseWheel() {
-	disableSelector();
 }
 
 function getBoardCoordsFromMousePos(x: number, y: number) {
