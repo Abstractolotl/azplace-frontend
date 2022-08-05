@@ -12,6 +12,7 @@ export interface StoreData {
         x: number,
         y: number
     } | null,
+    cachedPixelOwner: Map<String, any>
 }
 
 export interface Board {

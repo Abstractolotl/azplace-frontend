@@ -289,7 +289,7 @@ function getBoardCoordsFromMousePos(x: number, y: number) {
   height: 50px;;
   z-index: 10;
 
-  outline: 3px solid white;
+  outline: 5px solid white;
   border: 0.5px solid black;
 box-sizing: border-box;
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
