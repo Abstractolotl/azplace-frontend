@@ -9,7 +9,7 @@
         @confirm="onConfirm"
         @cancel="onCancel"
         :x="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
-        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 0"
+        :y="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.y : 0"
         :pixel-size="selectedPixelAbsolutePos ? selectedPixelAbsolutePos.x : 10"
         />
 
