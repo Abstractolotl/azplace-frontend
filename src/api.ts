@@ -138,7 +138,7 @@ async function doPlace() {
             body: JSON.stringify({
                 x: store.state.selectedPixel?.x,
                 y: store.state.selectedPixel?.y,
-                colorIndex: store.state.selectedColorIndex
+                color_index: store.state.selectedColorIndex
             })
         })
         if(!response.ok) throw response;
