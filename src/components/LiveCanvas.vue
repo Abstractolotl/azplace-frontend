@@ -62,7 +62,7 @@ function handleWebSocketMessage(event: MessageEvent) {
   let message = JSON.parse(event.data);
   if (!message.x || !message.y || !message.color_index || !store.state.canvas) return;
   setPixel(message.x, message.y, store.state.canvas.colors[message.color_index].toString());
-  store.state.cachedPixelOwner.set(message.x+"|"+message.y, null)
+  store.state.cachedPixelOwner.delete(message.x+"|"+message.y);
 }
 
 
@@ -80,25 +80,31 @@ watch(store.state, () => {
 })
 
 function initPanZoom() {
-  if (fanZoom.value) return;
-  if (!board.value || !htmlCanvas.value) {
-    store.dispatch("pushError", { message: "UI: Internal Error (302)"})
-    return;
-  }
+    if (fanZoom.value) return;
+    if (!board.value || !htmlCanvas.value || !boardWrapper.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (302)"})
+        return;
+    }
 
-  let zoomOptions = {
-    smoothScroll: false,
-    initialZoom: 3,
-    minZoom: MIN_ZOOM,
-    maxZoom: MAX_ZOOM,
-    zoomDoubleClickSpeed: 1
-  };
+    let zoomOptions = {
+        smoothScroll: false,
+        initialZoom: 3,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        zoomDoubleClickSpeed: 1
+    };
 
-  fanZoom.value = panzoom(board.value, zoomOptions);
-  fanZoom.value.on("panstart", disableSelector);
-  fanZoom.value.on("zoom", disableSelector);
-  fanZoom.value.on("transform", disableSelector);
-  fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
+    fanZoom.value = panzoom(board.value, zoomOptions);
+    fanZoom.value.on("panstart", disableSelector);
+    fanZoom.value.on("zoom", disableSelector);
+    fanZoom.value.on("transform", disableSelector);
+
+    fanZoom.value.moveTo(
+        boardWrapper.value.clientWidth * 0.5 - htmlCanvas.value.clientWidth * fanZoom.value.getTransform().scale * 0.5,
+        boardWrapper.value.clientHeight * 0.5 - htmlCanvas.value.clientHeight * fanZoom.value.getTransform().scale * 0.5
+    )
+
+  window.pants = fanZoom.value;
 }
 
 function loadBoard(board: Board) {
@@ -147,7 +153,11 @@ function selectPixel(x: number, y: number) {
 
   let transform = fanZoom.value.getTransform();
   let scale = transform.scale;
-  if (scale < MIN_ZOOM_SELECT) return;
+
+  if (scale < MIN_ZOOM_SELECT) {
+    zoomToPixel({x, y});
+    return;
+  }
   let transformedX = transform.x + x * scale;
   let transformedY = transform.y + y * scale;
 
@@ -158,6 +168,14 @@ function selectPixel(x: number, y: number) {
   store.state.selectedPixel = {x, y};
 
   enableSelector();
+}
+
+function zoomToPixel(pos: {x: number, y: number}) {
+    if(!fanZoom.value || !store.state.canvas) return;
+    console.log("yolo", pos.x, pos.y)
+
+    fanZoom.value.moveTo(window.innerWidth * 0.5, window.innerHeight * 0.5)
+    //fanZoom.value.zoomAbs(fanZoom.value.getTransform().x, fanZoom.value.getTransform().y, MIN_ZOOM_SELECT)
 }
 
 function onCancel() {
@@ -237,7 +255,7 @@ function onMouseUp(e: MouseEvent) {
 		if(!pos) return;
 		selectPixel(pos.x, pos.y)
 	} else {
-    hideColorPalette()
+        hideColorPalette()
 	}
 }
 
@@ -320,13 +338,14 @@ box-sizing: border-box;
 }
 
 canvas {
-  z-index: 100;
-  background-color: #fff;
-  image-rendering: optimizeSpeed; /* Older versions of FF          */
-  image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
-  image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
-  image-rendering: pixelated; /* Awesome future-browsers       */
-  -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+    //transform: translate(-50%, -50%);
+    z-index: 100;
+    background-color: #fff;
+    image-rendering: optimizeSpeed; /* Older versions of FF          */
+    image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
+    image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
+    image-rendering: pixelated; /* Awesome future-browsers       */
+    -ms-interpolation-mode: nearest-neighbor; /* IE                            */
 }
 
 .loader {

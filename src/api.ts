@@ -13,17 +13,18 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
 let socket: WebSocket | null;
 
 function setWebSocketHandler(handler: any) {
-    socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
+    socket = new WebSocket("ws://azplace.azubi.server.lan/ws");
     socket.addEventListener("message", handler);
     socket.addEventListener("close", () => {
         store.dispatch("pushError", { message: "Connection to WebSocket lost"})
     })
-    socket.addEventListener("error", () => {
+    socket.addEventListener("error", (e) => {
+        console.log(e);
         store.dispatch("pushError", { message: "Error with WebSocket connection"})
     })
 }
 
-async function loadUser() {
+async function loadUser(errorCallback: (error: any) => void) {
     const endpoint = BASE_URL + "/user/";
 
     try {
@@ -46,7 +47,11 @@ async function loadUser() {
         }
 
     } catch (e) {
-        store.dispatch("pushError", { message: "Login Failed"})
+        if(errorCallback) {
+            errorCallback(e);
+        } else {
+            store.dispatch("pushError", { message: "Could not fetch Profile"})
+        }
     }
 }
 
