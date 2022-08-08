@@ -46,8 +46,8 @@ const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({x: 0, y: 0})
 
-const MIN_ZOOM_SELECT = 8;
-const MIN_ZOOM = 3;
+const MIN_ZOOM_SELECT = 10;
+const MIN_ZOOM = 5;
 const MAX_ZOOM = 140;
 const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
 
@@ -171,11 +171,18 @@ function selectPixel(x: number, y: number) {
 }
 
 function zoomToPixel(pos: {x: number, y: number}) {
-    if(!fanZoom.value || !store.state.canvas) return;
-    console.log("yolo", pos.x, pos.y)
+    if(!fanZoom.value || !store.state.canvas || !boardWrapper.value || !htmlCanvas.value) {
+    store.dispatch("pushError", { message: "UI: Internal Error (307)"})
+    return;
+  }
 
-    fanZoom.value.moveTo(window.innerWidth * 0.5, window.innerHeight * 0.5)
-    //fanZoom.value.zoomAbs(fanZoom.value.getTransform().x, fanZoom.value.getTransform().y, MIN_ZOOM_SELECT)
+
+    fanZoom.value.zoomTo( 0, 0, MIN_ZOOM_SELECT / fanZoom.value.getTransform().scale )
+
+    fanZoom.value.moveTo(
+        boardWrapper.value.clientWidth * 0.5 - (pos.x) * fanZoom.value.getTransform().scale,
+        boardWrapper.value.clientHeight * 0.5 - (pos.y) * fanZoom.value.getTransform().scale
+    )
 }
 
 function onCancel() {
