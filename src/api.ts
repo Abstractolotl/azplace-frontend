@@ -13,7 +13,7 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
 let socket: WebSocket | null;
 
 function setWebSocketHandler(handler: any) {
-    socket = new WebSocket("ws://azplace.azubi.server.lan/ws");
+    socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
     socket.addEventListener("message", handler);
     socket.addEventListener("close", () => {
         store.dispatch("pushError", { message: "Connection to WebSocket lost"})
