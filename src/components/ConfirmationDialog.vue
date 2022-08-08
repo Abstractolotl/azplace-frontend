@@ -9,7 +9,7 @@
         </div>
     </div>
 
-    <div class="confirm-box">
+    <div v-if="store.state.user" class="confirm-box">
         <button :disabled="isCooldown" type="button" @click="onConfirmation" >
             <img src="@/assets/done.svg">
         </button>

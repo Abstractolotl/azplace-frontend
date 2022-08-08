@@ -230,7 +230,8 @@ function disableSelector() {
 
 function enableSelector() {
   selector.value?.classList.remove("hidden");
-  showColorPalette();
+
+  if(store.state.user) showColorPalette();
 }
 
 function setPixel(x: number, y: number, color: string) {

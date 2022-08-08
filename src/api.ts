@@ -67,7 +67,7 @@ async function doLogout() {
         const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
     } catch (e) {
-        store.dispatch("pushError", { message: "Logout Failed"})
+        store.dispatch("pushError", { message: "Logout Failed. Feature is not implemented. Delete your cookies if you really want to logout..."})
     }
 }
 
