@@ -14,15 +14,26 @@ let socket: WebSocket | null;
 
 function setWebSocketHandler(handler: any) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
-    socket.addEventListener("message", handler);
+
+    let attempts = 0;
+
+    socket.addEventListener("message", (e) => {
+        attempts = 0;
+        handler(e)
+    });
     socket.addEventListener("close", () => {
         // Dont send notification try to reconnect instead
-        // store.dispatch("pushError", { message: "Connection to WebSocket lost"})
-        setTimeout(() => {
-            setWebSocketHandler(handler);
-        }, 1500);
+        if(attempts < 3) {
+            attempts++;
+            setTimeout(() => {
+                setWebSocketHandler(handler);
+            }, 1500);
+        } else {
+            store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+        }
     })
-    socket.addEventListener("error", () => {
+    socket.addEventListener("error", (e) => {
+        console.log(e);
         store.dispatch("pushError", { message: "Error with WebSocket connection"})
     })
 }
