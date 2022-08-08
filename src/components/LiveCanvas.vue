@@ -46,8 +46,8 @@ const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({x: 0, y: 0})
 
-const MIN_ZOOM_SELECT = 8;
-const MIN_ZOOM = 3;
+const MIN_ZOOM_SELECT = 10;
+const MIN_ZOOM = 5;
 const MAX_ZOOM = 140;
 const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
 
@@ -62,7 +62,7 @@ function handleWebSocketMessage(event: MessageEvent) {
   let message = JSON.parse(event.data);
   if (!message.x || !message.y || !message.color_index || !store.state.canvas) return;
   setPixel(message.x, message.y, store.state.canvas.colors[message.color_index].toString());
-  store.state.cachedPixelOwner.set(message.x+"|"+message.y, null)
+  store.state.cachedPixelOwner.delete(message.x+"|"+message.y);
 }
 
 
@@ -80,25 +80,31 @@ watch(store.state, () => {
 })
 
 function initPanZoom() {
-  if (fanZoom.value) return;
-  if (!board.value || !htmlCanvas.value) {
-    store.dispatch("pushError", { message: "UI: Internal Error (302)"})
-    return;
-  }
+    if (fanZoom.value) return;
+    if (!board.value || !htmlCanvas.value || !boardWrapper.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (302)"})
+        return;
+    }
 
-  let zoomOptions = {
-    smoothScroll: false,
-    initialZoom: 3,
-    minZoom: MIN_ZOOM,
-    maxZoom: MAX_ZOOM,
-    zoomDoubleClickSpeed: 1
-  };
+    let zoomOptions = {
+        smoothScroll: false,
+        initialZoom: 3,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        zoomDoubleClickSpeed: 1
+    };
 
-  fanZoom.value = panzoom(board.value, zoomOptions);
-  fanZoom.value.on("panstart", disableSelector);
-  fanZoom.value.on("zoom", disableSelector);
-  fanZoom.value.on("transform", disableSelector);
-  fanZoom.value.moveTo(htmlCanvas.value.width, htmlCanvas.value.height);
+    fanZoom.value = panzoom(board.value, zoomOptions);
+    fanZoom.value.on("panstart", disableSelector);
+    fanZoom.value.on("zoom", disableSelector);
+    fanZoom.value.on("transform", disableSelector);
+
+    fanZoom.value.moveTo(
+        boardWrapper.value.clientWidth * 0.5 - htmlCanvas.value.clientWidth * fanZoom.value.getTransform().scale * 0.5,
+        boardWrapper.value.clientHeight * 0.5 - htmlCanvas.value.clientHeight * fanZoom.value.getTransform().scale * 0.5
+    )
+
+  window.pants = fanZoom.value;
 }
 
 function loadBoard(board: Board) {
@@ -147,7 +153,11 @@ function selectPixel(x: number, y: number) {
 
   let transform = fanZoom.value.getTransform();
   let scale = transform.scale;
-  if (scale < MIN_ZOOM_SELECT) return;
+
+  if (scale < MIN_ZOOM_SELECT) {
+    zoomToPixel({x, y});
+    return;
+  }
   let transformedX = transform.x + x * scale;
   let transformedY = transform.y + y * scale;
 
@@ -158,6 +168,21 @@ function selectPixel(x: number, y: number) {
   store.state.selectedPixel = {x, y};
 
   enableSelector();
+}
+
+function zoomToPixel(pos: {x: number, y: number}) {
+    if(!fanZoom.value || !store.state.canvas || !boardWrapper.value || !htmlCanvas.value) {
+    store.dispatch("pushError", { message: "UI: Internal Error (307)"})
+    return;
+  }
+
+
+    fanZoom.value.zoomTo( 0, 0, MIN_ZOOM_SELECT / fanZoom.value.getTransform().scale )
+
+    fanZoom.value.moveTo(
+        boardWrapper.value.clientWidth * 0.5 - (pos.x) * fanZoom.value.getTransform().scale,
+        boardWrapper.value.clientHeight * 0.5 - (pos.y) * fanZoom.value.getTransform().scale
+    )
 }
 
 function onCancel() {
@@ -205,7 +230,8 @@ function disableSelector() {
 
 function enableSelector() {
   selector.value?.classList.remove("hidden");
-  showColorPalette();
+
+  if(store.state.user) showColorPalette();
 }
 
 function setPixel(x: number, y: number, color: string) {
@@ -237,7 +263,7 @@ function onMouseUp(e: MouseEvent) {
 		if(!pos) return;
 		selectPixel(pos.x, pos.y)
 	} else {
-    hideColorPalette()
+        hideColorPalette()
 	}
 }
 
@@ -320,13 +346,14 @@ box-sizing: border-box;
 }
 
 canvas {
-  z-index: 100;
-  background-color: #fff;
-  image-rendering: optimizeSpeed; /* Older versions of FF          */
-  image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
-  image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
-  image-rendering: pixelated; /* Awesome future-browsers       */
-  -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+    //transform: translate(-50%, -50%);
+    z-index: 100;
+    background-color: #fff;
+    image-rendering: optimizeSpeed; /* Older versions of FF          */
+    image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
+    image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
+    image-rendering: pixelated; /* Awesome future-browsers       */
+    -ms-interpolation-mode: nearest-neighbor; /* IE                            */
 }
 
 .loader {

@@ -38,7 +38,7 @@ function setWebSocketHandler(handler: any) {
     })
 }
 
-async function loadUser() {
+async function loadUser(errorCallback: (error: any) => void) {
     const endpoint = BASE_URL + "/user/";
 
     try {
@@ -59,8 +59,12 @@ async function loadUser() {
             avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id
         }
 
-    } catch (ignored) {
-        // Irrelevant is only disturbin user experience
+    } catch (e) {
+        if(errorCallback) {
+            errorCallback(e);
+        } else {
+            store.dispatch("pushError", { message: "Could not fetch Profile"})
+        }
     }
 }
 
@@ -76,7 +80,7 @@ async function doLogout() {
         const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
     } catch (e) {
-        store.dispatch("pushError", { message: "Logout Failed"})
+        store.dispatch("pushError", { message: "Logout Failed. Feature is not implemented. Delete your cookies if you really want to logout..."})
     }
 }
 

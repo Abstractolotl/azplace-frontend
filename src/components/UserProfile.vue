@@ -35,7 +35,7 @@ defineProps({
 })
 
 onMounted(() => {
-    AzPlaceAPI.loadUser();
+    AzPlaceAPI.loadUser(() => {});
 })
 
 const username = computed(() => {

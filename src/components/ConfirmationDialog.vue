@@ -2,16 +2,14 @@
 <div ref="dialogWrapper" class="dialogWrapper">
 
     <div v-if="!!owner" class="owner-box">
-        <object :data="!owner.anonym ? owner.avatarURL : 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg'">
-            <img src="https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg">
-        </object>
+        <img :src="!owner.anonym ? owner.avatarURL : 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg'">
         <div>
             <span> {{owner.username}} </span>
             <span> {{convertTimeStamp(owner.timestamp)}} ago</span>
         </div>
     </div>
 
-    <div class="confirm-box">
+    <div v-if="store.state.user" class="confirm-box">
         <button :disabled="isCooldown" type="button" @click="onConfirmation" >
             <img src="@/assets/done.svg">
         </button>
