@@ -14,9 +14,23 @@ let socket: WebSocket | null;
 
 function setWebSocketHandler(handler: any) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
-    socket.addEventListener("message", handler);
+
+    let attempts = 0;
+
+    socket.addEventListener("message", (e) => {
+        attempts = 0;
+        handler(e)
+    });
     socket.addEventListener("close", () => {
-        store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+        // Dont send notification try to reconnect instead
+        if(attempts < 3) {
+            attempts++;
+            setTimeout(() => {
+                setWebSocketHandler(handler);
+            }, 1500);
+        } else {
+            store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+        }
     })
     socket.addEventListener("error", (e) => {
         console.log(e);
@@ -35,7 +49,6 @@ async function loadUser(errorCallback: (error: any) => void) {
         }
 
         const profile = await response.json();
-        console.log(profile);
         if(!profile || !profile.name || !profile.person_id) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
@@ -139,7 +152,7 @@ async function requestPixel(x: number, y: number) {
         }
 
     } catch (e) {
-        store.dispatch("pushError", { message: "Could not Pixel Info"})
+        // Irrelevant is only disturbin user experience
         return;
     }
 

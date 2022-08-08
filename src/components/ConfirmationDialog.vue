@@ -77,9 +77,7 @@ onMounted(async () => {
     const y = store.state.selectedPixel.y;
     const cacheKey = x+"|"+y;
     if(!store.state.cachedPixelOwner.has(cacheKey)) {
-        console.log("unknown user");
         const user = await AzPlaceAPI.requestPixel(x, y)
-        console.log(user);
         store.state.cachedPixelOwner.set(cacheKey, user);
         owner.value = user;
     } else {
