@@ -16,7 +16,11 @@ function setWebSocketHandler(handler: any) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
     socket.addEventListener("message", handler);
     socket.addEventListener("close", () => {
-        store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+        // Dont send notification try to reconnect instead
+        // store.dispatch("pushError", { message: "Connection to WebSocket lost"})
+        setTimeout(() => {
+            setWebSocketHandler(handler);
+        }, 1500);
     })
     socket.addEventListener("error", () => {
         store.dispatch("pushError", { message: "Error with WebSocket connection"})
@@ -34,7 +38,6 @@ async function loadUser() {
         }
 
         const profile = await response.json();
-        console.log(profile);
         if(!profile || !profile.name || !profile.person_id) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
@@ -45,8 +48,8 @@ async function loadUser() {
             avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id
         }
 
-    } catch (e) {
-        store.dispatch("pushError", { message: "Login Failed"})
+    } catch (ignored) {
+        // Irrelevant is only disturbin user experience
     }
 }
 
@@ -134,7 +137,7 @@ async function requestPixel(x: number, y: number) {
         }
 
     } catch (e) {
-        store.dispatch("pushError", { message: "Could not Pixel Info"})
+        // Irrelevant is only disturbin user experience
         return;
     }
 
