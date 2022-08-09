@@ -43,10 +43,6 @@ defineProps({
 
 onMounted(() => {
     AzPlaceAPI.loadUser(() => {
-        store.state.user = {
-            name: "Kevin",
-            avatarURL: ""
-        }
     });
 })
 
