@@ -21,6 +21,8 @@ export interface Board {
     colors: Array<String>;
     cooldown: number;
     initialData: CanvasData;
+    started: boolean,
+    startDate: number
 }
 
 export interface CanvasData {

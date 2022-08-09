@@ -206,6 +206,27 @@ async function doPlace() {
     return true;
 }
 
+async function changeSettings(anonymous: boolean) {
+    const endpoint = BASE_URL + "/auth/logout";
+
+    try {
+        const response = await fetch(endpoint, {
+            ...DEFAULT_REQUEST_HEADERS,
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                anonymize: anonymous
+            })
+        })
+        if(!response.ok) throw response;
+    } catch (e) {
+        store.dispatch("pushError", { message: "Could not change Settings"})
+    }
+}
+
 export default {
     doLogin,
     doLogout,
@@ -213,5 +234,6 @@ export default {
     loadBoard,
     loadUser,
     setWebSocketHandler,
-    requestPixel
+    requestPixel,
+    changeSettings
 }
