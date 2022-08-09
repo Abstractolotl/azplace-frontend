@@ -13,6 +13,7 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
 }
 
 let socket: WebSocket | null;
+let attempts = 0;
 
 function setWebSocketHandler(handler: any) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
@@ -23,10 +24,11 @@ function setWebSocketHandler(handler: any) {
         attempts = 0;
         handler(e)
     });
-    socket.addEventListener("close", () => {
+
+    socket.addEventListener("close", (e) => {
         // Dont send notification try to reconnect instead
         if(attempts < 3) {
-            attempts++;
+            attempts += 1;
             setTimeout(() => {
                 setWebSocketHandler(handler);
             }, 1500);
