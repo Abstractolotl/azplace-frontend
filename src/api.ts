@@ -112,16 +112,20 @@ async function loadBoardConfig() {
         const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
         const boardConfig = await response.json();
-        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown) {
+        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown || 
+            !boardConfig.timespan || boardConfig.timespan.start_date === null || boardConfig.timespan.remaining_time === null) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
-            return
+            console.log(boardConfig)
+            return;
         }
 
         return {
             width: boardConfig.size.width,
             height: boardConfig.size.height,
             colors: boardConfig.hex_colors,
-            cooldown: boardConfig.cooldown
+            cooldown: boardConfig.cooldown,
+            startDate: boardConfig.timespan.start_date,
+            started: boardConfig.timespan.start_date < Date.now()
         }
 
     } catch (e) {

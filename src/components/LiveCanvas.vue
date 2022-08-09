@@ -1,29 +1,35 @@
 // @ts-nocheck
 <template>
-  <div
-      ref="boardWrapper"
-      class="board-wrapper"
-  >
-    <div ref="selector" class="selector">
-        <div ref="selectorBg"></div>
-    </div>
-    <ConfirmationDialog 
-        v-if="store.getters.isSelecting"
-        @confirm="onConfirm"
-        @cancel="onCancel"
-        v-bind="selectedPixelAbsolutePos"
-    />
     <div
-        ref="board"
-        class="board"
-        @mousedown="onMouseDown"
-        @mouseup="onMouseUp"
+        ref="boardWrapper"
+        class="board-wrapper"
     >
-      <canvas v-if="store.state.canvas" ref="htmlCanvas"></canvas>
-      <div v-else class="loading">
+        <div ref="selector" class="selector">
+            <div ref="selectorBg"></div>
+        </div>
+        <ConfirmationDialog 
+            v-if="store.getters.isSelecting"
+            @confirm="onConfirm"
+            @cancel="onCancel"
+            v-bind="selectedPixelAbsolutePos"
+        />
+        <div
+            ref="board"
+            class="board"
+            @mousedown="onMouseDown"
+            @mouseup="onMouseUp"
+        >
+        <template v-if="store.state.canvas">
+            <div v-if="!store.state.canvas.started" class="lock">
+                <span>Board not yet started</span>
+                <span>{{countdown}}</span>
+            </div>
+            <canvas ref="htmlCanvas"></canvas>
+        </template>
+        <div v-else class="loading">
             <span>Loading Board</span> 
             <div class="loader"></div>
-      </div>
+        </div>
     </div>
   </div>
 </template>
@@ -45,6 +51,7 @@ const selectorBg = ref<HTMLElement>();
 const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({x: 0, y: 0})
+const countdown = ref<string>("");
 
 const MIN_ZOOM_SELECT = 10;
 const MIN_ZOOM = 5;
@@ -70,7 +77,14 @@ let lastCanvas: any = null;
 watch(store.state, () => {
   if(store.state.canvas && lastCanvas != store.state.canvas) {
     lastCanvas = store.state.canvas;
+    if(!store.state.canvas.started) {
+        countdown.value = new Date(store.state.canvas.startDate - Date.now() - 1000*60*60).toLocaleTimeString("de");
+        setInterval(() => {
+            countdown.value = new Date(store.state.canvas.startDate - Date.now() - 1000*60*60).toLocaleTimeString("de");
+        }, 1000)
+    }
     nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
+    console.log(store.state.canvas)
   }
   //TODO refactor
   if (!selectorBg.value || !store.state.canvas) return;
@@ -346,14 +360,34 @@ box-sizing: border-box;
 }
 
 canvas {
-    //transform: translate(-50%, -50%);
-    z-index: 100;
-    background-color: #fff;
-    image-rendering: optimizeSpeed; /* Older versions of FF          */
-    image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
-    image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
-    image-rendering: pixelated; /* Awesome future-browsers       */
-    -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+  z-index: 100;
+  background-color: #fff;
+  image-rendering: optimizeSpeed; /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
+  image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated; /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+
+  .lock + & {
+    filter: brightness(0.5);
+  }
+}
+
+.lock {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 110;
+
+    font-size: 4px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
 }
 
 .loader {
