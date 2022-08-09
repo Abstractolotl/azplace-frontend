@@ -30,6 +30,7 @@ export interface CanvasData {
 export interface User {
     name: string,
     avatarURL: string,
+    anonymous: boolean
 }
 
 export interface Sidebar {

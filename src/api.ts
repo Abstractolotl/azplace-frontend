@@ -18,7 +18,6 @@ let attempts = 0;
 function setWebSocketHandler(handler: any) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
 
-    let attempts = 0;
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
@@ -53,14 +52,15 @@ async function loadUser(errorCallback: (error: any) => void) {
         }
 
         const profile = await response.json();
-        if(!profile || !profile.name || !profile.person_id) {
+        if(!profile || !profile.name || !profile.person_id || !profile.user_settings || !profile.user_settings.anonymize) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
 
         store.state.user = {
             name: profile.name,
-            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id
+            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id,
+            anonymous: profile.user_settings.anonymize
         }
 
     } catch (e) {
