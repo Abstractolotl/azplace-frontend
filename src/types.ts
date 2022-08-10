@@ -21,6 +21,8 @@ export interface Board {
     colors: Array<String>;
     cooldown: number;
     initialData: CanvasData;
+    started: boolean,
+    startDate: number
 }
 
 export interface CanvasData {
@@ -30,6 +32,7 @@ export interface CanvasData {
 export interface User {
     name: string,
     avatarURL: string,
+    anonymous: boolean
 }
 
 export interface Sidebar {

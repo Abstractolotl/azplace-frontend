@@ -3,9 +3,7 @@
         <UserProfile :expanded="navbarOpen" />
         
         <div ref="content" :class="{ hidden: !navbarOpen }" class="content">
-            <Page v-if="store.state.sidebar.panel === 'palette'" title="Color Palette">
-                <ColorPalette />
-            </Page>
+            <Page v-if="store.state.sidebar.panel === 'palette'" title="Color Palette"> <ColorPalette /> </Page>
             <Page v-else-if="store.state.sidebar.panel === 'aboutus'" title="About Us"> <AboutUsPanel /></Page>
             <Page v-else-if="store.state.sidebar.panel === 'impressum'" title="Impressum"> <ImpressumPanel /></Page>
             <WelcomePanel v-else />
@@ -129,6 +127,8 @@ const closeNav = () => {
     .content {
         opacity: 1;
         transition: 0.5s;
+        overflow: hidden;
+        padding-bottom: 10px;
 
         //position: absolute;
         //left: 0;

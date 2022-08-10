@@ -1,9 +1,16 @@
 <template>
-    <div v-if="store.getters.loggedIn" class="user" :class="{expanded}">
-        <img :src="profile" />
-        <span> {{username}} </span>
-        <img src="@/assets/logout.svg" @click="logout"/>
-    </div>
+    <template  v-if="store.getters.loggedIn">
+        <div class="user" :class="{expanded}">
+            <img :src="profile" />
+            <span> {{username}} </span>
+            <img src="@/assets/logout.svg" @click="logout"/>
+        </div>
+        <div class="anonym">
+            <input id="anonym" type="checkbox" :checked="store.state.user?.anonymous" @change="onAnonymous" /> 
+            <label for="anonym" >Anonymous Mode</label>
+            <span> Let everyone see which pixels you placed! </span>
+        </div>
+    </template>
     <div v-else class="login" @click="login" :class="{expanded}">
         <template v-if="waitingForLogin">
             <div class="loader"></div>
@@ -35,7 +42,8 @@ defineProps({
 })
 
 onMounted(() => {
-    AzPlaceAPI.loadUser(() => {});
+    AzPlaceAPI.loadUser(() => {
+    });
 })
 
 const username = computed(() => {
@@ -55,6 +63,12 @@ async function login() {
     waitingForLogin.value = true;
     await AzPlaceAPI.doLogin();
     waitingForLogin.value = false;
+}
+
+function onAnonymous(e: Event) {
+    const input = e.target as HTMLInputElement;
+    console.log(input.checked);
+    AzPlaceAPI.changeSettings(input.checked);
 }
 
 </script>
@@ -165,6 +179,37 @@ $profile-size: 40px;
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+}
+
+.anonym {
+    text-align: center;
+    position: relative;
+    margin-top: 10px;
+    
+    * {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    input {
+        transform: scale(1.5);
+        margin-right: 10px;
+    }
+
+    > span {
+        position: absolute;
+        background-color: rgba(white, 0.75);
+        border-radius: 5px;
+        top: 25px;
+        z-index: 150;
+
+        color: black;
+        display: none;
+    }
+
+    &:hover > span {
+        display: block;
     }
 }
 

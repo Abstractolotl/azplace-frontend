@@ -3,7 +3,9 @@ import { store } from "./store";
 import type { Board, StoreData } from "./types";
 
 const BASE_URL = "https://api.azplace.azubi.server.lan";
-const DEFAULT_BOARD_ID = 1;
+
+const params = new URLSearchParams(window.location.search);
+const DEFAULT_BOARD_ID = params.has("board") ? params.get("board") : 1;
 
 const DEFAULT_REQUEST_HEADERS: RequestInit = {
     credentials: "include",
@@ -11,20 +13,21 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
 }
 
 let socket: WebSocket | null;
+let attempts = 0;
 
 function setWebSocketHandler(handler: any) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
 
-    let attempts = 0;
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
         handler(e)
     });
-    socket.addEventListener("close", () => {
+
+    socket.addEventListener("close", (e) => {
         // Dont send notification try to reconnect instead
         if(attempts < 3) {
-            attempts++;
+            attempts += 1;
             setTimeout(() => {
                 setWebSocketHandler(handler);
             }, 1500);
@@ -49,14 +52,15 @@ async function loadUser(errorCallback: (error: any) => void) {
         }
 
         const profile = await response.json();
-        if(!profile || !profile.name || !profile.person_id) {
+        if(!profile || !profile.name || !profile.person_id || !profile.user_settings || !profile.user_settings.anonymize) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
 
         store.state.user = {
             name: profile.name,
-            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id
+            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id,
+            anonymous: profile.user_settings.anonymize
         }
 
     } catch (e) {
@@ -108,16 +112,20 @@ async function loadBoardConfig() {
         const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
         const boardConfig = await response.json();
-        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown) {
+        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown || 
+            !boardConfig.timespan || boardConfig.timespan.start_date === null || boardConfig.timespan.remaining_time === null) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
-            return
+            console.log(boardConfig)
+            return;
         }
 
         return {
             width: boardConfig.size.width,
             height: boardConfig.size.height,
             colors: boardConfig.hex_colors,
-            cooldown: boardConfig.cooldown
+            cooldown: boardConfig.cooldown,
+            startDate: boardConfig.timespan.start_date,
+            started: boardConfig.timespan.start_date < Date.now()
         }
 
     } catch (e) {
@@ -198,6 +206,27 @@ async function doPlace() {
     return true;
 }
 
+async function changeSettings(anonymous: boolean) {
+    const endpoint = BASE_URL + "/user/settings";
+
+    try {
+        const response = await fetch(endpoint, {
+            ...DEFAULT_REQUEST_HEADERS,
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                anonymize: anonymous
+            })
+        })
+        if(!response.ok) throw response;
+    } catch (e) {
+        store.dispatch("pushError", { message: "Could not change Settings"})
+    }
+}
+
 export default {
     doLogin,
     doLogout,
@@ -205,5 +234,6 @@ export default {
     loadBoard,
     loadUser,
     setWebSocketHandler,
-    requestPixel
+    requestPixel,
+    changeSettings
 }
