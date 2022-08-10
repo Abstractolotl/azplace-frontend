@@ -20,7 +20,7 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
-        if(e.data.board_id !== DEFAULT_BOARD_ID) return;
+        if(e.data.board_id != DEFAULT_BOARD_ID) return;
         if(e.data.x === undefined || e.data.y === undefined || e.data.color_index === undefined) {
             return;
         }
