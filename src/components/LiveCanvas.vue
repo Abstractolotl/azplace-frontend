@@ -62,14 +62,13 @@ const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a 
 onMounted(async () => {
     disableSelector();
     await AzPlaceAPI.loadBoard();
-    AzPlaceAPI.setWebSocketHandler(handleWebSocketMessage)
+    AzPlaceAPI.setLiveUpdateHandler(handleLiveUpdate)
 })
 
-function handleWebSocketMessage(event: MessageEvent) {
-  let message = JSON.parse(event.data);
-  if (!message.x || !message.y || !message.color_index || !store.state.canvas) return;
-  setPixel(message.x, message.y, store.state.canvas.colors[message.color_index].toString());
-  store.state.cachedPixelOwner.delete(message.x+"|"+message.y);
+function handleLiveUpdate({x, y, color_index}: {x: number, y: number, color_index: number}) {
+    if(!store.state.canvas) return;
+    setPixel(x, y, store.state.canvas.colors[color_index].toString());
+    store.state.cachedPixelOwner.delete(x + "|" + y);
 }
 
 

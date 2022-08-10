@@ -15,13 +15,18 @@ const DEFAULT_REQUEST_HEADERS: RequestInit = {
 let socket: WebSocket | null;
 let attempts = 0;
 
-function setWebSocketHandler(handler: any) {
+function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, color_index: number}) => void) {
     socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
-
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
-        handler(e)
+        if(e.data.board_id !== DEFAULT_BOARD_ID) return;
+        if(e.data.x === undefined || e.data.y === undefined || e.data.color_index === undefined) {
+            console.log("Bad Data:", e.data);
+            return;
+        }
+
+        handler({x: e.data.x, y: e.data.y, color_index: e.data.color_index})
     });
 
     socket.addEventListener("close", (e) => {
@@ -29,7 +34,7 @@ function setWebSocketHandler(handler: any) {
         if(attempts < 3) {
             attempts += 1;
             setTimeout(() => {
-                setWebSocketHandler(handler);
+                setLiveUpdateHandler(handler);
             }, 1500);
         } else {
             store.dispatch("pushError", { message: "Connection to WebSocket lost"})
@@ -52,7 +57,7 @@ async function loadUser(errorCallback: (error: any) => void) {
         }
 
         const profile = await response.json();
-        if(!profile || !profile.name || !profile.person_id || !profile.user_settings || !profile.user_settings.anonymize) {
+        if(!profile || !profile.name || !profile.person_id || !profile.user_settings || profile.user_settings.anonymize === undefined) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
@@ -113,7 +118,7 @@ async function loadBoardConfig() {
         if(!response.ok) throw response;
         const boardConfig = await response.json();
         if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown || 
-            !boardConfig.timespan || boardConfig.timespan.start_date === null || boardConfig.timespan.remaining_time === null) {
+            !boardConfig.timespan || boardConfig.timespan.start_date === undefined || boardConfig.timespan.remaining_time === undefined) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             console.log(boardConfig)
             return;
@@ -233,7 +238,7 @@ export default {
     doPlace,
     loadBoard,
     loadUser,
-    setWebSocketHandler,
+    setLiveUpdateHandler,
     requestPixel,
     changeSettings
 }
