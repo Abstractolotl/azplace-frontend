@@ -30,9 +30,11 @@ const columnClass = computed(() => {
         return;
     }
 
-    if(numberOfTiles.value < 100) {
+    if(numberOfTiles.value < 32) {
         return "two";
     }
+    
+    return "three";
 })
 
 
