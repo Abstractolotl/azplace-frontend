@@ -20,7 +20,7 @@
             @mouseup="onMouseUp"
         >
         <template v-if="store.state.canvas">
-            <div v-if="!store.state.canvas.started" class="lock">
+            <div v-if="!store.state.canvas.started" class="lock" ref="divCountdown">
                 <span>Board not yet started</span>
                 <span>{{countdown}}</span>
             </div>
@@ -52,6 +52,7 @@ const boardWrapper = ref<HTMLElement>();
 const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({x: 0, y: 0})
 const countdown = ref<string>("");
+const divCountdown = ref<HTMLDivElement>();
 
 const MIN_ZOOM_SELECT = 10;
 const MIN_ZOOM = 5;
@@ -76,14 +77,10 @@ let lastCanvas: any = null;
 watch(store.state, () => {
   if(store.state.canvas && lastCanvas != store.state.canvas) {
     lastCanvas = store.state.canvas;
-    if(!store.state.canvas.started) {
-        countdown.value = new Date(store.state.canvas.startDate - Date.now()).toLocaleTimeString("de");
-        setInterval(() => {
-            countdown.value = new Date(store.state.canvas.startDate - Date.now()).toLocaleTimeString("de");
-        }, 1000)
-    }
     nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
-    console.log(store.state.canvas)
+    updateCountdown();
+    if(divCountdown.value) divCountdown.value.style.width = store.state.canvas.width + "px";
+    setInterval(updateCountdown, 1000)
   }
   //TODO refactor
   if (!selectorBg.value || !store.state.canvas) return;
@@ -91,6 +88,18 @@ watch(store.state, () => {
   nextTick().then(initPanZoom);
   
 })
+
+function updateCountdown() {
+    if(!store.state.canvas || store.state.canvas.started) return;
+
+    const millis = store.state.canvas.startDate - Date.now();
+    const remaining = new Date(millis).toISOString();
+
+    const days = Number.parseInt(remaining.substring(8, 10)) - 1;
+    const time = remaining.substring(11, 19);
+
+    countdown.value = days + ":" + time;
+}
 
 function initPanZoom() {
     if (fanZoom.value) return;

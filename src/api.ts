@@ -22,7 +22,6 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
         attempts = 0;
         if(e.data.board_id !== DEFAULT_BOARD_ID) return;
         if(e.data.x === undefined || e.data.y === undefined || e.data.color_index === undefined) {
-            console.log("Bad Data:", e.data);
             return;
         }
 
@@ -41,7 +40,6 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
         }
     })
     socket.addEventListener("error", (e) => {
-        console.log(e);
         store.dispatch("pushError", { message: "Error with WebSocket connection"})
     })
 }
@@ -117,10 +115,13 @@ async function loadBoardConfig() {
         const response = await fetch(endpoint, DEFAULT_REQUEST_HEADERS)
         if(!response.ok) throw response;
         const boardConfig = await response.json();
-        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown || 
-            !boardConfig.timespan || boardConfig.timespan.start_date === undefined || boardConfig.timespan.remaining_time === undefined) {
+        if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
-            console.log(boardConfig)
+            return;
+        }
+
+        if(!boardConfig.timespan || boardConfig.timespan.started === undefined|| boardConfig.timespan.start_date === undefined || boardConfig.timespan.remaining_time === undefined) {
+            store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
 
@@ -129,8 +130,8 @@ async function loadBoardConfig() {
             height: boardConfig.size.height,
             colors: boardConfig.hex_colors,
             cooldown: boardConfig.cooldown,
-            startDate: boardConfig.timespan.start_date,
-            started: boardConfig.timespan.start_date < Date.now()
+            startDate: Date.now() + boardConfig.timespan.remaining_time,
+            started: boardConfig.timespan.started
         }
 
     } catch (e) {
