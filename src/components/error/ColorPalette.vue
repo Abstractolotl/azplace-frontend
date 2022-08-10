@@ -1,7 +1,7 @@
 <template>
     <div class="palette">
         <div :class="columnClass">
-            <ColorTile v-for="(n, index) in numberOfTiles" :color-index="index%8" />
+            <ColorTile v-for="(n, index) in numberOfTiles" :color-index="index" />
         </div>
     </div>
 </template>
@@ -22,7 +22,7 @@ onMounted(() => {
         return;
     }
     
-    numberOfTiles.value = 32;
+    numberOfTiles.value = store.state.canvas.colors.length;
 })
 
 const columnClass = computed(() => {
