@@ -1,29 +1,14 @@
 <template>
     <div class="palette">
-        <template v-if="numberOfTiles > 8">
-            <div>
-                <div v-for="(n, index) in Math.ceil(numberOfTiles / 2)">
-                    <ColorTile :color-index="index" />
-                </div>
-            </div>
-            <div>
-                <div v-for="(n, index) in Math.floor(numberOfTiles / 2)">
-                    <ColorTile :color-index="Math.ceil(numberOfTiles / 2) + index" />
-                </div>
-            </div>
-        </template>
-        <template v-else>
-            <div>
-                <div v-for="(color, index) in store.state.canvas?.colors">
-                    <ColorTile :color-index="index" />
-                </div>
-            </div>
-        </template>
+        <div :class="columnClass">
+            <ColorTile v-for="(n, index) in numberOfTiles" :color-index="index%8" />
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import type { StoreData } from "@/types";
+import { computed } from "@vue/reactivity";
 import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import ColorTile from "../ColorTile.vue";
@@ -37,9 +22,18 @@ onMounted(() => {
         return;
     }
     
-    numberOfTiles.value = store.state.canvas.colors.length;
+    numberOfTiles.value = 32;
 })
 
+const columnClass = computed(() => {
+    if(numberOfTiles.value < 8) {
+        return;
+    }
+
+    if(numberOfTiles.value < 100) {
+        return "two";
+    }
+})
 
 
 </script>
@@ -52,16 +46,22 @@ onMounted(() => {
     gap: 10px;
 
     transition: 0.25s;
+    overflow-y: auto;
 
     > div {
-        
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
+        display: grid;
         gap: 10px;
+        padding: 5px;
 
-        transition: 0.25s;
+        grid-template-columns: auto;
+
+        &.two {
+            grid-template-columns: auto auto;
+        }
+
+        &.three {
+            grid-template-columns: auto auto auto;
+        }
     }
 }
 
