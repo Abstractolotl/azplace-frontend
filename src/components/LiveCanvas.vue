@@ -77,9 +77,11 @@ let lastCanvas: any = null;
 watch(store.state, () => {
   if(store.state.canvas && lastCanvas != store.state.canvas) {
     lastCanvas = store.state.canvas;
-    nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
+    nextTick().then(() => { 
+        if(store.state.canvas) loadBoard(store.state.canvas) 
+        if(divCountdown.value) divCountdown.value.style.width = store.state.canvas.width + "px";
+    })
     updateCountdown();
-    if(divCountdown.value) divCountdown.value.style.width = store.state.canvas.width + "px";
     setInterval(updateCountdown, 1000)
   }
   //TODO refactor
