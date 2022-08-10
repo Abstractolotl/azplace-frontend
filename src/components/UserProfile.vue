@@ -67,7 +67,6 @@ async function login() {
 
 function onAnonymous(e: Event) {
     const input = e.target as HTMLInputElement;
-    console.log(input.checked);
     AzPlaceAPI.changeSettings(input.checked);
 }
 

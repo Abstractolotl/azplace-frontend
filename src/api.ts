@@ -22,7 +22,6 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
         attempts = 0;
         if(e.data.board_id !== DEFAULT_BOARD_ID) return;
         if(e.data.x === undefined || e.data.y === undefined || e.data.color_index === undefined) {
-            console.log("Bad Data:", e.data);
             return;
         }
 
@@ -41,7 +40,6 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
         }
     })
     socket.addEventListener("error", (e) => {
-        console.log(e);
         store.dispatch("pushError", { message: "Error with WebSocket connection"})
     })
 }
@@ -119,7 +117,6 @@ async function loadBoardConfig() {
         const boardConfig = await response.json();
         if(!boardConfig || !boardConfig.size || !boardConfig.hex_colors || !boardConfig.cooldown) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
-            console.log(boardConfig)
             return;
         }
 
