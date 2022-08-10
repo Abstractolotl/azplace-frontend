@@ -20,12 +20,16 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
-        if(e.data.board_id != DEFAULT_BOARD_ID) return;
-        if(e.data.x === undefined || e.data.y === undefined || e.data.color_index === undefined) {
+
+        const data = JSON.parse(e.data);
+        if(data.board_id != DEFAULT_BOARD_ID) {
+            console.log(data.board_if, DEFAULT_BOARD_ID)
+        }
+        if(data.x === undefined || data.y === undefined || data.color_index === undefined) {
             return;
         }
 
-        handler({x: e.data.x, y: e.data.y, color_index: e.data.color_index})
+        handler({x: data.x, y: data.y, color_index: data.color_index})
     });
 
     socket.addEventListener("close", (e) => {
