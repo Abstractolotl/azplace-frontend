@@ -78,9 +78,9 @@ watch(store.state, () => {
   if(store.state.canvas && lastCanvas != store.state.canvas) {
     lastCanvas = store.state.canvas;
     if(!store.state.canvas.started) {
-        countdown.value = new Date((store.state.canvas.startDate / 1000) - Date.now()).toLocaleTimeString("de");
+        countdown.value = new Date(store.state.canvas.startDate - Date.now()).toLocaleTimeString("de");
         setInterval(() => {
-            countdown.value = new Date((store.state.canvas.startDate / 1000) - Date.now()).toLocaleTimeString("de");
+            countdown.value = new Date(store.state.canvas.startDate - Date.now()).toLocaleTimeString("de");
         }, 1000)
     }
     nextTick().then(() => { if(store.state.canvas) loadBoard(store.state.canvas) })
