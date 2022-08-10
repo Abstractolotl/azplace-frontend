@@ -207,7 +207,7 @@ async function doPlace() {
 }
 
 async function changeSettings(anonymous: boolean) {
-    const endpoint = BASE_URL + "/auth/logout";
+    const endpoint = BASE_URL + "/user/settings";
 
     try {
         const response = await fetch(endpoint, {

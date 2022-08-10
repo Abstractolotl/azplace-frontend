@@ -185,6 +185,7 @@ $profile-size: 40px;
 .anonym {
     text-align: center;
     position: relative;
+    margin-top: 10px;
     
     * {
         cursor: pointer;

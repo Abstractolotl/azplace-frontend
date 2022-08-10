@@ -31,12 +31,13 @@ function onBack() {
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 0 15px;
     
     .arrow-back {
         filter: invert(1);
         height: 25px;
         position: absolute;
-        left: 15px;
+        left: 5px;
         cursor: pointer;
     }
 }
