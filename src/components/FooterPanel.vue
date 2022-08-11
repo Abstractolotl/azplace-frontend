@@ -1,6 +1,9 @@
 <template>
     <div class="panel">
         <div class="lang">
+            <a href="https://forms.gle/JuYuzkxUYMFYXwoY6">Feedback / Bug Report</a>
+        </div>
+        <div class="lang">
             <span>Language: </span>
             <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/google/313/flag-germany_1f1e9-1f1ea.png" />
             <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/google/313/flag-united-states_1f1fa-1f1f8.png" />
