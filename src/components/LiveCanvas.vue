@@ -271,7 +271,7 @@ function showColorPalette() {
 }
 
 function hideColorPalette() {
-  document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 350, forceClose: false}}))
+  document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 300, forceClose: false}}))
 }
 
 
