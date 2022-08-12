@@ -29,10 +29,15 @@
         display: flex;
         justify-content: center;
         flex-direction: column;
+        gap: 10px;
 
         > div {
             display: grid;
             grid-template-columns: auto auto auto;
+        }
+
+        img {
+            width: 100px;
         }
     }
 
