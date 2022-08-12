@@ -8,7 +8,7 @@
         <div class="anonym">
             <input id="anonym" type="checkbox" :checked="store.state.user?.anonymous" @change="onAnonymous" /> 
             <label for="anonym" >Anonymous Mode</label>
-            <span> Let everyone see which pixels you placed! </span>
+            <span> Let everyone see which pixels were placed by you! </span>
         </div>
     </template>
     <div v-else class="login" @click="login" :class="{expanded}">

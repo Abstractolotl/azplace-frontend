@@ -16,7 +16,7 @@ export const store: Store<StoreData> = createStore({
             sidebar: {
                 expanded: false,
                 panel: "",
-                width: 250
+                width: 300
             },
             errors: [],
             cachedPixelOwner: new Map()

@@ -29,7 +29,7 @@ const store = useStore<StoreData>();
 const sidebar = ref<HTMLElement>();
 const content = ref<HTMLElement>();
 
-let WIDTH_EXPANDED = 250;
+let WIDTH_EXPANDED = 300;
 const WIDTH_HIDDEN = 25;
 
 let navbarOpen = ref(false);
@@ -42,6 +42,7 @@ function onNavigate(e: CustomEvent) {
 
     store.state.sidebar.panel = page;
     changeWidth(width);
+
 
     if(e.detail.forceOpen) openNav();
     if(e.detail.forceClose) closeNav();
@@ -58,7 +59,7 @@ function changeWidth(width: number) {
     sidebar.value.style.width = width + "px";
     WIDTH_EXPANDED = width;
 
-    const scale = width / 250;
+    const scale = width / WIDTH_EXPANDED;
     content.value.style.transform = `scale(${scale})`;
 }
 
@@ -106,7 +107,7 @@ const closeNav = () => {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @use "../variables.scss" as *;
 
 .sidebar {
@@ -123,6 +124,10 @@ const closeNav = () => {
     display: flex;
     flex-direction: column;
 
+    a, a:visited {
+        color: lightcyan;
+    }
+
 
     .content {
         opacity: 1;
@@ -138,7 +143,7 @@ const closeNav = () => {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
-        width: 250px;
+        width: $sidebar-max-width;
         transform: scale(1);
     }
 

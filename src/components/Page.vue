@@ -18,7 +18,7 @@ const props = defineProps({
 })
 
 function onBack() {
-    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 250}}))
+    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "", width: 300}}))
 }
 
 </script>

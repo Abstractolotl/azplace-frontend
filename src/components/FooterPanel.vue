@@ -24,7 +24,7 @@ const store = useStore<StoreData>();
 const emit = defineEmits(["navigate"])
 
 function about() {
-    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "aboutus", width: 500}}))
+    document.dispatchEvent(new CustomEvent("navigate", {detail: {page: "aboutus", width: 400}}))
 }
 
 function impressum() {

@@ -2,10 +2,19 @@
 <div class="panel">
     <h1> Welcome to az/Place </h1>
     <span>
-        Draw beatiful Art pixel by pixel together with your colleagues. <br />
-        You can place one pixel every 5 minutes. <br />
-        <br />
-        Share with your friends and family.
+    <strong>Team up with your co-workers and create beautiful artworks together!</strong> <br /> <br/>
+    Every few seconds you can place a pixel by clicking on it and choosing what color you want it to be. <br />
+    Make sure to be logged in before trying to place a pixel. <br />
+    <br />
+    Inspired by Reddit's <i>r/Place</i> we created our own version: <strong>az/Place</strong>. <br /> <br />
+
+    Want to know how az/Place works? You can checkout the project on <a href="https://github.com/Abstractolotl/">GitHub</a>,
+    see the <a href="https://api.azplace.azubi.server.lan/swagger-ui/index.html" @click="aboutus">ask us</a> or <a href="#" @click="aboutus">ask us</a> directly! <br /> <br />
+    Have fun creating beautiful art by yourself, with your coworker or mess with the art of your colleagues.
+
+    If you run into any troubles please let us know by clicking the link at the very bottom. <br />
+    <br />
+    Be mindful of what you draw though, because inappropriate behaviour may be punished. <br /> (even when you're in anonymous mode)
     </span>
 </div>
 </template>
