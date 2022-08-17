@@ -7,7 +7,7 @@
         <div ref="selector" class="selector">
             <div ref="selectorBg"></div>
         </div>
-        <ConfirmationDialog 
+        <PixelDialog 
             v-if="store.getters.isSelecting"
             @confirm="onConfirm"
             @cancel="onCancel"
@@ -41,7 +41,7 @@ import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {Store, useStore} from "vuex";
 import panzoom, {type PanZoom} from "panzoom";
 import AzPlaceAPI from "@/api.js";
-import ConfirmationDialog from "./ConfirmationDialog.vue";
+import PixelDialog from "./PixelDialog.vue";
 
 const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
