@@ -133,6 +133,7 @@ function onConfirm() {
     setColorOfPixel(x, y, color);
     AzPlaceAPI.doPlace(x, y, store.state.selectedColorIndex);
     clearSelection();
+    hideColorPalette();
     cachePixelOwner(x, y, store.state.user);
 }
 
@@ -146,7 +147,6 @@ function selectPixel(x: number, y: number) {
         y >= store.state.board.height) {
         return;
     }
-
 
     let transform = fanZoom.value.getTransform();
     let scale = transform.scale;
@@ -167,7 +167,7 @@ function selectPixel(x: number, y: number) {
         }
     };
 
-    enableSelector();
+    showColorPalette();
 }
 
 function zoomToPixel(pos: { x: number, y: number }) {
@@ -201,10 +201,6 @@ const getColorFromData = (x: number, y: number, width: number, height: number, d
 
 function clearSelection() {
     store.state.selectedPixel = null;
-}
-
-function enableSelector() {
-    if (store.state.user) showColorPalette();
 }
 
 function setColorOfPixel(x: number, y: number, color: string) {
