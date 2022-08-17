@@ -1,8 +1,11 @@
 <template>
-<div ref="dialogWrapper" class="dialogWrapper">
+<div ref="dialogWrapper"  v-if="owner" class="dialogWrapper">
 
-    <div v-if="!!owner" class="owner-box">
-        <img :src="!owner.anonym ? owner.avatarURL : 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg'">
+    <div class="owner-box">
+        <div class="img">
+            <img src="https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg">
+            <img :src="owner.avatarURL">
+        </div>
         <div>
             <span> {{owner.username}} </span>
             <span> {{convertTimeStamp(owner.timestamp)}} ago</span>
@@ -64,24 +67,14 @@ const DIALOG_PADDING = 15;
 
 let intervalFunc: any;
 
-
-onBeforeMount(() => {
+onMounted(async () => {
     if(!store.state.selectedPixel) return;
-
-    const x = store.state.selectedPixel.x;
-    const y = store.state.selectedPixel.y;
-    const cacheKey = x+"|"+y;
-
-    if(!store.state.cachedPixelOwner.has(cacheKey)) {
-        requestAndCachePixelOwner(x, y);
-        return;
-    }
-
-    owner.value = store.state.cachedPixelOwner.get(cacheKey);
-})
-
-onMounted(() => {
+    const x = store.state.selectedPixel.coords.x;
+    const y = store.state.selectedPixel.coords.y;
     
+    const pixelOwner = await loadPixelOwner(x, y);
+    owner.value = pixelOwner;
+
     updateCooldown();
     nextTick().then(() => updateDialogPosition())
     intervalFunc = setInterval(() => {
@@ -109,12 +102,20 @@ function convertTimeStamp(time: number) {
 }
 
 
-function requestAndCachePixelOwner(x: number, y:number) {
+async function requestAndCachePixelOwner(x: number, y:number) {
     const cacheKey = x+"|"+y;
-    AzPlaceAPI.requestPixel(x, y).then(user => {
-        store.state.cachedPixelOwner.set(cacheKey, user);
-        owner.value = user;
-    })
+    const pixelOwner = await AzPlaceAPI.requestPixel(x, y);
+
+    store.state.cachedPixelOwner.set(cacheKey, pixelOwner);
+    return pixelOwner;
+}
+
+async function loadPixelOwner(x: number, y:number) {
+    const cacheKey = x+"|"+y;
+    if(!store.state.cachedPixelOwner.has(cacheKey)) {
+        return await requestAndCachePixelOwner(x, y);
+    }
+    return store.state.cachedPixelOwner.get(cacheKey);
 }
 
 onUnmounted(() => {
@@ -132,20 +133,20 @@ function onCancel() {
 }
 
 const updateCooldown = () => {
-    if (!store.state.canvas) {
+    if (!store.state.board) {
         store.dispatch("pushError", { message: "UI: Internal Error (200)"})
         return "";
     }
 
     const timeSincePlaced = Date.now() - store.state.lastTimePlaced;
-    const cooldownLeft = Math.max(0, store.state.canvas.cooldown - timeSincePlaced);
+    const cooldownLeft = Math.max(0, store.state.board.cooldown - timeSincePlaced);
 
     isCooldown.value = cooldownLeft > 0;
     
     const minutes = Math.floor(cooldownLeft / (60 * 1000));
     const seconds = Math.floor(cooldownLeft / 1000);
 
-    loadingBarWidth.value = (cooldownLeft / store.state.canvas.cooldown) * 100 + "%";
+    loadingBarWidth.value = (cooldownLeft / store.state.board.cooldown) * 100 + "%";
 
     cooldownText.value = minutes + ":" + (seconds < 10 ? "0": "") + seconds;
 };
@@ -209,6 +210,41 @@ function updateDialogPosition() {
     box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
+
+
+
+    .owner-box {
+        display: flex;
+        padding: 5px;
+        gap: 5px;
+
+        .img {
+            height: 30px;
+            width: 30px;
+            position: relative;
+
+            > img {
+                position: absolute;
+                left: 0;
+                top: 0;
+
+                height: 30px;
+                width: 30px;
+                border-radius: 30px;
+            }
+        }
+
+        div {
+            display: flex;
+            flex-direction: column;
+        }
+
+         span:nth-child(2){
+            color: gray;
+            font-size: 14px;
+        }
+
+    }
 
     > .cooldown-box {
         display: flex;
@@ -282,31 +318,6 @@ function updateDialogPosition() {
             filter: invert(26%) sepia(68%) saturate(7495%) hue-rotate(354deg) brightness(93%) contrast(124%);
             }
         }
-    }
-
-    .owner-box {
-        display: flex;
-        padding: 5px;
-        gap: 5px;
-        border-bottom: 1px solid lightgray;
-        margin-bottom: 5px;
-
-        img, object {
-            height: 30px;
-            width: 30px;
-            border-radius: 30px;
-        }
-
-        div {
-            display: flex;
-            flex-direction: column;
-        }
-
-         span:nth-child(2){
-            color: gray;
-            font-size: 14px;
-        }
-
     }
 }
 </style>

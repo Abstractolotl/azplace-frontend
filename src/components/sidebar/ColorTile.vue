@@ -26,19 +26,18 @@ function onColorClicked() {
 }
 
 function initColorFromStore() {
-    if (!store.state.canvas) return;
+    if (!store.state.board) return;
     if(props.colorIndex < 0 && props.colorIndex >= 16) {
         store.dispatch("pushError", { message: "UI: Internal Error (100)"})
         return;
     }
 
-    const canvas = store.state.canvas;
-    if( !canvas  || !canvas.colors  || canvas.colors.length <= props.colorIndex || !colorTile.value) {
+    if( !store.state.board || store.state.board.colors.length <= props.colorIndex || !colorTile.value) {
         store.dispatch("pushError", { message: "UI: Internal Error (101)"})
         return;
     }
 
-    colorTile.value.style.backgroundColor = store.state.canvas.colors[props.colorIndex].toString();
+    colorTile.value.style.backgroundColor = store.state.board.colors[props.colorIndex].toString();
 }
 
 onMounted(() => {

@@ -11,18 +11,18 @@ import type { StoreData } from "@/types";
 import { computed } from "@vue/reactivity";
 import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
-import ColorTile from "../ColorTile.vue";
+import ColorTile from "./ColorTile.vue";
 
 const store = useStore<StoreData>();
 
 const numberOfTiles = ref<number>(0);
 
 onMounted(() => {
-    if(!store.state.canvas) {
+    if(!store.state.board) {
         return;
     }
     
-    numberOfTiles.value = store.state.canvas.colors.length;
+    numberOfTiles.value = store.state.board.colors.length;
 })
 
 const columnClass = computed(() => {

@@ -1,5 +1,5 @@
 export interface StoreData {
-    canvas: Board | null,
+    board: Board | null,
     user: User | null,
     sidebar: Sidebar
     lastTimePlaced: number,
@@ -8,11 +8,20 @@ export interface StoreData {
         message: string,
         time: number
     }>,
-    selectedPixel: {
+    selectedPixel: SelectionInfo | null,
+    cachedPixelOwner: Map<String, any>
+}
+
+export interface SelectionInfo {
+    transform: {
+        x: number,
+        y: number,
+        pixelSize: number
+    },
+    coords: {
         x: number,
         y: number
-    } | null,
-    cachedPixelOwner: Map<String, any>
+    }
 }
 
 export interface Board {

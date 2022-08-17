@@ -41,11 +41,6 @@ defineProps({
   }
 })
 
-onMounted(() => {
-    AzPlaceAPI.loadUser(() => {
-    });
-})
-
 const username = computed(() => {
     return store.state.user?.name.toString() || "USER NOT FOUND";
 })
@@ -73,7 +68,7 @@ function onAnonymous(e: Event) {
 </script>
 
 <style scoped lang="scss">
-@use "../variables.scss" as *;
+@use "@/variables.scss" as *;
 
 $panel-height: 50px;
 $icon-height: 25px;

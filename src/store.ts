@@ -8,7 +8,7 @@ import { createStore, Store } from "vuex";
 export const store: Store<StoreData> = createStore({
     state: function() {
         return {
-            canvas: null,
+            board: null,
             lastTimePlaced: 0,
             selectedColorIndex: 0,
             selectedPixel: null,
