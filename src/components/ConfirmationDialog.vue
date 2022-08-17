@@ -97,6 +97,12 @@ function convertTimeStamp(time: number) {
         return Math.floor(timestamp / (1000 * 60) ) + "m";
     } else if(timestamp < 24 * 60 * 60 * 1000) {
         return Math.floor(timestamp / (1000 * 60 * 60) ) + "h";
+    } else if(timestamp < 7 * 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (24 * 1000 * 60 * 60) ) + "d";
+    } else if(timestamp < 30 * 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (7 * 24 * 1000 * 60 * 60) ) + "weeks";
+    } else if(timestamp < 6 * 30 * 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (30 * 24 * 1000 * 60 * 60) ) + "months";
     } else {
         return "long";
     }
