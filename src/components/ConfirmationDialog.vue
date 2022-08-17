@@ -31,7 +31,7 @@
 
 
 <script lang="ts" setup>
-import {nextTick, onMounted, onUnmounted, ref} from "vue";
+import {nextTick, onBeforeMount, onMounted, onUnmounted, ref} from "vue";
 import {useStore} from "vuex";
 import type {StoreData} from "@/types";
 import { computed } from "@vue/reactivity";
@@ -64,25 +64,29 @@ const DIALOG_PADDING = 15;
 
 let intervalFunc: any;
 
-onMounted(async () => {
+
+onBeforeMount(() => {
+    if(!store.state.selectedPixel) return;
+
+    const x = store.state.selectedPixel.x;
+    const y = store.state.selectedPixel.y;
+    const cacheKey = x+"|"+y;
+
+    if(!store.state.cachedPixelOwner.has(cacheKey)) {
+        requestAndCachePixelOwner(x, y);
+        return;
+    }
+
+    owner.value = store.state.cachedPixelOwner.get(cacheKey);
+})
+
+onMounted(() => {
     
     updateCooldown();
     nextTick().then(() => updateDialogPosition())
     intervalFunc = setInterval(() => {
         updateCooldown();
     }, 1000);
-
-    if(!store.state.selectedPixel) return;
-    const x = store.state.selectedPixel.x;
-    const y = store.state.selectedPixel.y;
-    const cacheKey = x+"|"+y;
-    if(!store.state.cachedPixelOwner.has(cacheKey)) {
-        const user = await AzPlaceAPI.requestPixel(x, y)
-        store.state.cachedPixelOwner.set(cacheKey, user);
-        owner.value = user;
-    } else {
-        owner.value = store.state.cachedPixelOwner.get(cacheKey);
-    }
 })
 
 function convertTimeStamp(time: number) {
@@ -96,6 +100,15 @@ function convertTimeStamp(time: number) {
     } else {
         return "long";
     }
+}
+
+
+function requestAndCachePixelOwner(x: number, y:number) {
+    const cacheKey = x+"|"+y;
+    AzPlaceAPI.requestPixel(x, y).then(user => {
+        store.state.cachedPixelOwner.set(cacheKey, user);
+        owner.value = user;
+    })
 }
 
 onUnmounted(() => {
