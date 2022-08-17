@@ -14,7 +14,7 @@ import LiveBoard from "./components/LiveBoard.vue";
 import ErrorOverlay from "./components/error/ErrorOverlay.vue";
 import { onMounted } from "vue";
 
-import AzPlaceAPI from "@/api.js";
+import AzPlaceAPI from "@/api";
 import { useStore } from "vuex";
 import type { StoreData } from "./types";
 import BoardLoadingPlaceholder from "./components/sidebar/BoardLoadingPlaceholder.vue";

@@ -28,7 +28,6 @@ onMounted(() => {
         zoomDoubleClickSpeed: 1
     });
 
-
     fanZoom.moveTo(
         window.innerWidth * 0.5 - locked.value.clientWidth * fanZoom.getTransform().scale * 0.5,
         window.innerHeight * 0.5 - locked.value.clientHeight * fanZoom.getTransform().scale * 0.5

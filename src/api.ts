@@ -165,7 +165,7 @@ async function requestPixel(x: number, y: number) {
             anonym: anonymous,
             username: pixelInfo.username,
             timestamp: pixelInfo.timestamp,
-            avatarURL: !anonymous ? "https://image.azubi.server.lan/picture/" + pixelInfo.person_id : "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg"
+            avatarURL: !anonymous ? "https://image.azubi.server.lan/picture/" + pixelInfo.person_id : "src/assets/default-profile.jpg"
         }
 
     } catch (e) {

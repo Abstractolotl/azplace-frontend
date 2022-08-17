@@ -3,7 +3,7 @@
 
     <div class="owner-box">
         <div class="img">
-            <img src="https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg">
+            <img src="@/assets/default-profile.jpg">
             <img :src="owner.avatarURL">
         </div>
         <div>
@@ -34,11 +34,10 @@
 
 
 <script lang="ts" setup>
-import {nextTick, onBeforeMount, onMounted, onUnmounted, ref} from "vue";
+import {nextTick, onMounted, onUnmounted, ref} from "vue";
 import {useStore} from "vuex";
 import type {StoreData} from "@/types";
-import { computed } from "@vue/reactivity";
-import AzPlaceAPI from "@/api.js";
+import AzPlaceAPI from "@/api";
 
 const store = useStore<StoreData>();
 const dialogWrapper = ref<HTMLElement>();

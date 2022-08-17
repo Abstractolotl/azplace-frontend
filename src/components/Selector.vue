@@ -1,6 +1,6 @@
 <template>
     <div ref="selector" class="selector">
-        <div ref="selectorBg"></div>
+        <div :style="'background-color: ' + store.state.board?.colors[store.state.selectedColorIndex]"></div>
     </div>
 </template>
 
@@ -22,13 +22,6 @@ onMounted(() => {
     selector.value.style.width = store.state.selectedPixel.transform.pixelSize + "px"
     selector.value.style.height = store.state.selectedPixel.transform.pixelSize + "px";
 })
-
-/**
- * 
- *  watch store:
-  if (!selectorBg.value || !store.state.canvas) return;
-  selectorBg.value.style.backgroundColor = store.state.canvas.colors[store.state.selectedColorIndex].toString();
- */
 </script>
 
 <style lang="scss">

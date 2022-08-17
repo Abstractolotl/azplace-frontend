@@ -20,7 +20,7 @@ import type { Board, CanvasData, StoreData, User } from "@/types";
 import { nextTick, onMounted, ref, watch } from "vue";
 import { Store, useStore } from "vuex";
 import panzoom, { type PanZoom } from "panzoom";
-import AzPlaceAPI from "@/api.js";
+import AzPlaceAPI from "@/api";
 import PixelDialog from "./PixelDialog.vue";
 import Selector from "./Selector.vue";
 
@@ -175,7 +175,6 @@ function zoomToPixel(pos: { x: number, y: number }) {
         store.dispatch("pushError", { message: "UI: Internal Error (307)" })
         return;
     }
-
 
     fanZoom.value.zoomTo(0, 0, MIN_ZOOM_SELECT / fanZoom.value.getTransform().scale)
 
