@@ -1,7 +1,7 @@
 <template>
     <div class="aboutus">
-        Meet the group of talented Apprenices that worked hard to bring ths Project to life <br />
-        If you want to know more about the creation process don't be afraid to get in contact with us 
+        Meet the group of talented Apprentices that worked hard to bring this Project to life <br />
+        If you want to know more about the creation process, don't be afraid to get in contact with us 
         
         <div>
             <a href="https://united-internet.org/profiles/people/21550081"><img src="https://image.azubi.server.lan/picture/21550081"/></a>
