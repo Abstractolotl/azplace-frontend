@@ -18,12 +18,12 @@ import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import ColorTile from "./ColorTile.vue";
 import UserProfile from "./UserProfile.vue";
-import WelcomePanel from "./WelcomePanel.vue";
+import WelcomePanel from "./pages/WelcomePage.vue";
 import FooterPanel from "./FooterPanel.vue";
-import AboutUsPanel from "./AboutUsPanel.vue";
+import AboutUsPanel from "./pages/AboutUsPage.vue";
 import Page from "./Page.vue";
-import ImpressumPanel from "./ImpressumPanel.vue";
-import ColorPalette from "./error/ColorPalette.vue";
+import ImpressumPanel from "./pages/ImpressumPage.vue";
+import ColorPalette from "./ColorPalette.vue";
 
 const store = useStore<StoreData>();
 const sidebar = ref<HTMLElement>();
@@ -108,7 +108,7 @@ const closeNav = () => {
 </script>
 
 <style lang="scss">
-@use "../variables.scss" as *;
+@use "@/variables.scss" as *;
 
 .sidebar {
     height: 100vh;
