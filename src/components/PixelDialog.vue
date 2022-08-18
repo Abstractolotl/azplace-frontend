@@ -175,23 +175,6 @@ function updateDialogPosition() {
     }
     dialogWrapper.value.style.left = selectorCenterX + left  + "px";
     dialogWrapper.value.style.top = selectorCenterY + "px";
-/*
-  // left right
-  if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
-    dialogWrapper.value.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
-  } else {                                                          // right
-    dialogWrapper.value.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
-  }
-
-  // top bottom
-  if (selectorCenterY - (dialogHeight / 2) < 0) {                   // top
-    dialogWrapper.value.style.top = DIALOG_PADDING + "px";
-  } else if (selectorCenterY + (dialogHeight / 2) > boardHeight) {  // bottom
-    dialogWrapper.value.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
-  } else {
-    dialogWrapper.value.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
-  }
-  */
 }
 
 </script>

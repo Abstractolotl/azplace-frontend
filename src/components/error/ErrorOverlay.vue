@@ -14,9 +14,7 @@ import type { StoreData } from '@/types.js';
 import { useStore } from 'vuex';
 import Error from './Error.vue';
 
-
 const store = useStore<StoreData>();
-
 </script>
 
 <style lang="scss" scoped>

@@ -4,11 +4,9 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
 import { store } from '@/store.js';
 import { onMounted } from 'vue';
-
 
 const props = defineProps({
     message: {
