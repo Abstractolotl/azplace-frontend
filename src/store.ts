@@ -1,8 +1,4 @@
-
-// @ts-nocheck 
-        
-import type { Board, StoreData } from "@/types";
-import { reactive } from "vue";
+import type { StoreData } from "@/types";
 import { createStore, Store } from "vuex";
 
 export const store: Store<StoreData> = createStore({
@@ -18,7 +14,7 @@ export const store: Store<StoreData> = createStore({
                 panel: "",
                 width: 300
             },
-            errors: [],
+            errors: [{}],
             cachedPixelOwner: new Map()
         }
     },

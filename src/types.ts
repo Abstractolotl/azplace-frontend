@@ -4,10 +4,10 @@ export interface StoreData {
     sidebar: Sidebar
     lastTimePlaced: number,
     selectedColorIndex: number,
-    errors: Array<{
+    errors: [{
         message: string,
-        time: number
-    }>,
+        time: number | Date
+    }] | [{}],
     selectedPixel: SelectionInfo | null,
     cachedPixelOwner: Map<String, any>
 }
