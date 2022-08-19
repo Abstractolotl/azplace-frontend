@@ -31,7 +31,7 @@ import AzPlaceAPI from "@/api"
 
 const store = useStore<StoreData>();
 
-const DEFAULT_PROFILE = "@/assets/default-profile.jpg";
+const DEFAULT_PROFILE = "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg";
 
 const waitingForLogin = ref(false);
 
@@ -39,6 +39,11 @@ defineProps({
   expanded: {
     type: Boolean
   }
+})
+
+onMounted(() => {
+    AzPlaceAPI.loadUser(() => {
+    });
 })
 
 const username = computed(() => {
@@ -68,7 +73,7 @@ function onAnonymous(e: Event) {
 </script>
 
 <style scoped lang="scss">
-@use "@/variables.scss" as *;
+@use "../variables.scss" as *;
 
 $panel-height: 50px;
 $icon-height: 25px;

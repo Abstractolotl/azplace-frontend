@@ -24,7 +24,6 @@ const store = useStore<StoreData>();
 .error-container {
     display: flex;
     flex-direction: column-reverse;
-    pointer-events: none;
 
     $width: 250px;
     position: absolute;
