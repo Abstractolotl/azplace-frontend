@@ -66,7 +66,7 @@ async function loadUser() {
 
         return {
             name: profile.name,
-            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id,
+            avatarURL: "https://api.azubi.server.lan/image/personalpicture/" + profile.person_id,
             anonymous: profile.user_settings.anonymize
         }
 
@@ -165,7 +165,7 @@ async function requestPixel(x: number, y: number) {
             anonym: anonymous,
             username: pixelInfo.username,
             timestamp: pixelInfo.timestamp,
-            avatarURL: !anonymous ? "https://image.azubi.server.lan/picture/" + pixelInfo.person_id : "src/assets/default-profile.jpg"
+            avatarURL: !anonymous ? "https://api.azubi.server.lan/image/personalpicture/" + pixelInfo.person_id : "src/assets/default-profile.jpg"
         }
 
     } catch (e) {

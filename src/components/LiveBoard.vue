@@ -38,8 +38,8 @@ const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a 
 
 onMounted(async () => {
     clearSelection();
+    loadBoard();
     initPanZoom();
-    loadBoard()
     AzPlaceAPI.setLiveUpdateHandler(handleLiveUpdate);
 })
 
