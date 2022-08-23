@@ -66,7 +66,7 @@ async function loadUser(errorCallback: (error: any) => void) {
 
         store.state.user = {
             name: profile.name,
-            avatarURL: "https://api.azubi.server.lan/image/personalpicture/" + profile.person_id,
+            avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id,
             anonymous: profile.user_settings.anonymize
         }
 
@@ -166,7 +166,7 @@ async function requestPixel(x: number, y: number) {
             anonym: pixelInfo.username === "anonymous",
             username: pixelInfo.username,
             timestamp: pixelInfo.timestamp,
-            avatarURL: "https://api.azubi.server.lan/image/personalpicture/" + pixelInfo.person_id
+            avatarURL: "https://image.azubi.server.lan/picture/" + pixelInfo.person_id
         }
 
     } catch (e) {
