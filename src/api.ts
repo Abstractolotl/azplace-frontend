@@ -48,7 +48,7 @@ function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, 
     })
 }
 
-async function loadUser(errorCallback: (error: any) => void) {
+async function loadUser() {
     const endpoint = BASE_URL + "/user/";
 
     try {
@@ -61,21 +61,17 @@ async function loadUser(errorCallback: (error: any) => void) {
         const profile = await response.json();
         if(!profile || !profile.name || !profile.person_id || !profile.user_settings || profile.user_settings.anonymize === undefined) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
-            return;
+            return null;
         }
 
-        store.state.user = {
+        return {
             name: profile.name,
             avatarURL: "https://image.azubi.server.lan/picture/" + profile.person_id,
             anonymous: profile.user_settings.anonymize
         }
 
     } catch (e) {
-        if(errorCallback) {
-            errorCallback(e);
-        } else {
-            store.dispatch("pushError", { message: "Could not fetch Profile"})
-        }
+        return null;
     }
 }
 
@@ -101,11 +97,11 @@ async function loadBoard() {
 
     if(!config || !data) {
         store.dispatch("pushError", { message: "Could not load Board"})
-        return;
+        return null;
     }
 
 
-    store.state.canvas = { 
+    return { 
         ...config,
         initialData: data
     }
@@ -158,15 +154,18 @@ async function requestPixel(x: number, y: number) {
         }
 
         if(!pixelInfo || !pixelInfo.username || !pixelInfo.person_id) {
-            store.dispatch("pushError", { message: "Received bad data from Server"})
+            store.dispatch("pushError", { message: "Received bad data  from Server"})
             return;
         }
 
+        
+        const anonymous = Number.parseInt(pixelInfo.person_id) === 0
+
         return {
-            anonym: pixelInfo.username === "anonymous",
+            anonym: anonymous,
             username: pixelInfo.username,
             timestamp: pixelInfo.timestamp,
-            avatarURL: "https://image.azubi.server.lan/picture/" + pixelInfo.person_id
+            avatarURL: !anonymous ? "https://image.azubi.server.lan/picture/" + pixelInfo.person_id : "src/assets/default-profile.jpg"
         }
 
     } catch (e) {
@@ -191,7 +190,7 @@ async function loadBoardData() {
     }
 }
 
-async function doPlace() {
+async function doPlace(x: number, y:number, colorIndex: number) {
     const endpoint = BASE_URL + "/board/" + DEFAULT_BOARD_ID + "/place";
 
     try {
@@ -203,9 +202,9 @@ async function doPlace() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                x: store.state.selectedPixel?.x,
-                y: store.state.selectedPixel?.y,
-                color_index: store.state.selectedColorIndex
+                x: x,
+                y: y,
+                color_index: colorIndex
             })
         })
         if(!response.ok) throw response;
