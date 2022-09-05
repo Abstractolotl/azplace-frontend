@@ -1,19 +1,11 @@
 <template>
-    <div ref="downladButton" class="penis" :class="{expanded}" @click="downladImage">
-      <span> penis </span>
+    <div class="download" :class="{expanded}" @click="downladImage">
+      <span> Download Canvas </span>
     </div>
   <br>
 </template>
 
 <script lang="ts" setup>
-import {ref} from "vue";
-
-const downloadButton = ref<HTMLElement>()
-
-//@ts-ignore
-//var image = document.querySelector("canvas").toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-
-//window.location.href=image
 
 function downladImage() {
   var link = document.createElement('a')
@@ -23,8 +15,6 @@ function downladImage() {
   document.body.appendChild(link)
   link.click()
   document.removeChild(link)
-  console.log("penis")
-  //window.location.href = image
 }
 
 </script>
@@ -36,7 +26,7 @@ $panel-height: 50px;
 $icon-height: 25px;
 $profile-size: 40px;
 
-.penis {
+.download {
   display: flex;
   justify-content: center;
   align-items: center;
