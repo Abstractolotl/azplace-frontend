@@ -1,5 +1,5 @@
 <template>
-    <div class="download" :class="{expanded}" @click="downladImage">
+    <div class="download" @click="downloadImage">
       <span class="downloadText"> Download Canvas </span>
     </div>
   <br>
@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 
-function downladImage() {
+function downloadImage() {
   var link = document.createElement('a')
   //@ts-ignore
   link.href = document.querySelector("canvas").toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
