@@ -1,8 +1,8 @@
 <template>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <div class="download" @click="downloadImage">
-    <span class="material-symbols-outlined"> file_download </span>
-    <span class="downloadText"> Download Canvas </span>
+    <span class="material-symbols-outlined">file_download</span>
+    <span class="downloadText">Download</span>
   </div>
   <br>
 </template>
@@ -36,15 +36,13 @@ $profile-size: 40px;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
-
-    > img:last-of-type {
-      opacity: 1;
-    }
   }
+
 }
 
 .downloadText {
   color: darkgray;
+  margin: 5px;
 }
 
 </style>
