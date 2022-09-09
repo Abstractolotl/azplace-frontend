@@ -1,7 +1,9 @@
 <template>
-    <div class="download" @click="downloadImage">
-      <span class="downloadText"> Download Canvas </span>
-    </div>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <div class="download" @click="downloadImage">
+    <span class="material-symbols-outlined"> file_download </span>
+    <span class="downloadText"> Download Canvas </span>
+  </div>
   <br>
 </template>
 
@@ -30,6 +32,7 @@ $profile-size: 40px;
   align-items: center;
   height: 40px;
   position: relative;
+  cursor: pointer;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
