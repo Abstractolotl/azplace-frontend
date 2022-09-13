@@ -1,42 +1,46 @@
 <template>
-<div ref="dialogWrapper"  v-if="owner" class="dialogWrapper">
+    <div ref="dialogWrapper" v-if="owner" class="dialogWrapper">
 
-    <div class="owner-box">
-        <div class="img">
-            <img src="@/assets/default-profile.jpg">
-            <img :src="owner.avatarURL">
+        <div class="owner-box">
+            <div class="img">
+                <img src="@/assets/default-profile.jpg">
+                <img :src="owner.avatarURL">
+            </div>
+            <div>
+                <span> {{ owner.username }} </span>
+                <span class="timestamp" @click="timestampAsLocalDate = !timestampAsLocalDate"> {{
+                timestampAsLocalDate ? showTimeOfPixelPlacement(owner.timestamp) : convertTimeStamp(owner.timestamp)
+                + " ago"
+                }}
+                </span>
+            </div>
         </div>
-        <div>
-            <span> {{owner.username}} </span>
-            <span> {{convertTimeStamp(owner.timestamp)}} ago</span>
+
+        <div v-if="store.state.user" class="confirm-box">
+            <button :disabled="isCooldown" type="button" @click="onConfirmation">
+                <img src="@/assets/done.svg">
+            </button>
+            <button type="button" @click="onCancel">
+                <img src="@/assets/close.svg">
+            </button>
         </div>
-    </div>
 
-    <div v-if="store.state.user" class="confirm-box">
-        <button :disabled="isCooldown" type="button" @click="onConfirmation" >
-            <img src="@/assets/done.svg">
-        </button>
-        <button type="button" @click="onCancel" >
-            <img src="@/assets/close.svg">
-        </button>
-    </div>
-
-    <div class="cooldown-box" v-if="isCooldown">
-        <img src="@/assets/timer.svg">
-        <div>
-            <span> {{ cooldownText }} </span>
-            <div class="loading-bar" :style="'width:' + loadingBarWidth "> </div>
+        <div class="cooldown-box" v-if="isCooldown">
+            <img src="@/assets/timer.svg">
+            <div>
+                <span> {{ cooldownText }} </span>
+                <div class="loading-bar" :style="'width:' + loadingBarWidth "></div>
+            </div>
         </div>
-    </div>
 
-</div>
+    </div>
 </template>
 
 
 <script lang="ts" setup>
-import {nextTick, onMounted, onUnmounted, ref} from "vue";
-import {useStore} from "vuex";
-import type {StoreData} from "@/types";
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { useStore } from "vuex";
+import type { StoreData } from "@/types";
 import AzPlaceAPI from "@/api";
 
 const store = useStore<StoreData>();
@@ -47,19 +51,22 @@ const owner = ref<any>();
 const loadingBarWidth = ref<string>("0%");
 
 const emit = defineEmits(["confirm", "cancel"]);
+
+const timestampAsLocalDate = ref<boolean>(false);
+
 const props = defineProps({
-  x: {
-    type: Number,
-    required: true
-  },
-  y: {
-    type: Number,
-    required: true
-  },
-  pixelSize: {
-    type: Number,
-    required: true
-  }
+    x: {
+        type: Number,
+        required: true
+    },
+    y: {
+        type: Number,
+        required: true
+    },
+    pixelSize: {
+        type: Number,
+        required: true
+    }
 });
 
 const DIALOG_PADDING = 15;
@@ -67,10 +74,10 @@ const DIALOG_PADDING = 15;
 let intervalFunc: any;
 
 onMounted(async () => {
-    if(!store.state.selectedPixel) return;
+    if (!store.state.selectedPixel) return;
     const x = store.state.selectedPixel.coords.x;
     const y = store.state.selectedPixel.coords.y;
-    
+
     const pixelOwner = await loadPixelOwner(x, y);
     owner.value = pixelOwner;
 
@@ -83,35 +90,42 @@ onMounted(async () => {
 
 function convertTimeStamp(time: number) {
     const timestamp = Date.now() - time;
-    if(timestamp < 60 * 1000) {
+    if (timestamp < 60 * 1000) {
         return Math.floor(timestamp / 1000) + "s";
-    } else if(timestamp < 60 * 60 * 1000) {
-        return Math.floor(timestamp / (1000 * 60) ) + "m";
-    } else if(timestamp < 24 * 60 * 60 * 1000) {
-        return Math.floor(timestamp / (1000 * 60 * 60) ) + "h";
-    } else if(timestamp < 7 * 24 * 60 * 60 * 1000) {
-        return Math.floor(timestamp / (24 * 1000 * 60 * 60) ) + "d";
-    } else if(timestamp < 30 * 24 * 60 * 60 * 1000) {
-        return Math.floor(timestamp / (7 * 24 * 1000 * 60 * 60) ) + "weeks";
-    } else if(timestamp < 6 * 30 * 24 * 60 * 60 * 1000) {
-        return Math.floor(timestamp / (30 * 24 * 1000 * 60 * 60) ) + "months";
+    } else if (timestamp < 60 * 60 * 1000) {
+        return Math.floor(timestamp / (1000 * 60)) + "m";
+    } else if (timestamp < 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (1000 * 60 * 60)) + "h";
+    } else if (timestamp < 7 * 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (24 * 1000 * 60 * 60)) + "d";
+    } else if (timestamp < 30 * 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (7 * 24 * 1000 * 60 * 60)) + "weeks";
+    } else if (timestamp < 6 * 30 * 24 * 60 * 60 * 1000) {
+        return Math.floor(timestamp / (30 * 24 * 1000 * 60 * 60)) + "months";
     } else {
         return "long";
     }
 }
 
+function showTimeOfPixelPlacement(time: number) {
+    const date = new Date(time)
+    const localTime = date.toLocaleTimeString("de").substring(0, 5);
+    const localDate = date.toLocaleDateString("de")
+    return localDate.substring(0, localDate.length - 4) + localDate.substring(localDate.length - 2, localDate.length) + " " + localTime
+}
 
-async function requestAndCachePixelOwner(x: number, y:number) {
-    const cacheKey = x+"|"+y;
+
+async function requestAndCachePixelOwner(x: number, y: number) {
+    const cacheKey = x + "|" + y;
     const pixelOwner = await AzPlaceAPI.requestPixel(x, y);
 
     store.state.cachedPixelOwner.set(cacheKey, pixelOwner);
     return pixelOwner;
 }
 
-async function loadPixelOwner(x: number, y:number) {
-    const cacheKey = x+"|"+y;
-    if(!store.state.cachedPixelOwner.has(cacheKey)) {
+async function loadPixelOwner(x: number, y: number) {
+    const cacheKey = x + "|" + y;
+    if (!store.state.cachedPixelOwner.has(cacheKey)) {
         return await requestAndCachePixelOwner(x, y);
     }
     return store.state.cachedPixelOwner.get(cacheKey);
@@ -122,18 +136,18 @@ onUnmounted(() => {
 })
 
 function onConfirmation() {
-  emit("confirm");
-  store.state.selectedPixel = null;
+    emit("confirm");
+    store.state.selectedPixel = null;
 }
 
 function onCancel() {
-  emit("cancel");
-  store.state.selectedPixel = null;
+    emit("cancel");
+    store.state.selectedPixel = null;
 }
 
 const updateCooldown = () => {
     if (!store.state.board) {
-        store.dispatch("pushError", { message: "UI: Internal Error (200)"})
+        store.dispatch("pushError", { message: "UI: Internal Error (200)" })
         return "";
     }
 
@@ -141,64 +155,63 @@ const updateCooldown = () => {
     const cooldownLeft = Math.max(0, store.state.board.cooldown - timeSincePlaced);
 
     isCooldown.value = cooldownLeft > 0;
-    
+
     const minutes = Math.floor(cooldownLeft / (60 * 1000));
     const seconds = Math.floor(cooldownLeft / 1000);
 
     loadingBarWidth.value = (cooldownLeft / store.state.board.cooldown) * 100 + "%";
 
-    cooldownText.value = minutes + ":" + (seconds < 10 ? "0": "") + seconds;
+    cooldownText.value = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
 };
 
 function updateDialogPosition() {
-  if (!dialogWrapper.value) {
-    store.dispatch("pushError", { message: "UI: Internal Error (202)"})
-    return;
-  }
+    if (!dialogWrapper.value) {
+        store.dispatch("pushError", { message: "UI: Internal Error (202)" })
+        return;
+    }
 
-  const {x, y, pixelSize} = props;
+    const { x, y, pixelSize } = props;
 
-  const dialogWidth = dialogWrapper.value.getBoundingClientRect().width;
-  const dialogHeight = dialogWrapper.value.getBoundingClientRect().height;
-  const selectorCenterX = x + (pixelSize / 2);
-  const selectorCenterY = y + (pixelSize / 2);
-  const boardWidth = window.innerWidth;
-  const boardHeight = window.innerHeight;
+    const dialogWidth = dialogWrapper.value.getBoundingClientRect().width;
+    const dialogHeight = dialogWrapper.value.getBoundingClientRect().height;
+    const selectorCenterX = x + (pixelSize / 2);
+    const selectorCenterY = y + (pixelSize / 2);
+    const boardWidth = window.innerWidth;
+    const boardHeight = window.innerHeight;
 
 
     let left = pixelSize * 0.5 + DIALOG_PADDING;
     dialogWrapper.value.style.transform = "translate(0, -50%)"
 
-    if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 >= boardWidth) {
+    if (x + pixelSize + dialogWidth + DIALOG_PADDING * 2 >= boardWidth) {
         left *= -1;
         dialogWrapper.value.style.transform = "translate(-100%, -50%)"
     }
-    dialogWrapper.value.style.left = selectorCenterX + left  + "px";
+    dialogWrapper.value.style.left = selectorCenterX + left + "px";
     dialogWrapper.value.style.top = selectorCenterY + "px";
-/*
-  // left right
-  if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
-    dialogWrapper.value.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
-  } else {                                                          // right
-    dialogWrapper.value.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
-  }
-
-  // top bottom
-  if (selectorCenterY - (dialogHeight / 2) < 0) {                   // top
-    dialogWrapper.value.style.top = DIALOG_PADDING + "px";
-  } else if (selectorCenterY + (dialogHeight / 2) > boardHeight) {  // bottom
-    dialogWrapper.value.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
-  } else {
-    dialogWrapper.value.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
-  }
-  */
+    /*
+      // left right
+      if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
+        dialogWrapper.value.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
+      } else {                                                          // right
+        dialogWrapper.value.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
+      }
+  
+      // top bottom
+      if (selectorCenterY - (dialogHeight / 2) < 0) {                   // top
+        dialogWrapper.value.style.top = DIALOG_PADDING + "px";
+      } else if (selectorCenterY + (dialogHeight / 2) > boardHeight) {  // bottom
+        dialogWrapper.value.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
+      } else {
+        dialogWrapper.value.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
+      }
+      */
 }
 
 </script>
 
 
 <style lang="scss">
-
 .dialogWrapper {
     position: absolute;
     left: 0px;
@@ -211,7 +224,6 @@ function updateDialogPosition() {
     flex-direction: column;
 
 
-
     .owner-box {
         display: flex;
         padding: 5px;
@@ -222,7 +234,7 @@ function updateDialogPosition() {
             width: 30px;
             position: relative;
 
-            > img {
+            >img {
                 position: absolute;
                 left: 0;
                 top: 0;
@@ -238,14 +250,14 @@ function updateDialogPosition() {
             flex-direction: column;
         }
 
-         span:nth-child(2){
+        span:nth-child(2) {
             color: gray;
             font-size: 14px;
         }
 
     }
 
-    > .cooldown-box {
+    >.cooldown-box {
         display: flex;
         justify-content: center;
         align-items: flex-end;
@@ -255,14 +267,14 @@ function updateDialogPosition() {
         padding: 3px;
         padding-top: 0;
 
-         span {
+        span {
             display: inline-block;
             text-align: right;
             padding-left: 5px;
         }
 
-        > img {
-        height: 20px;
+        >img {
+            height: 20px;
         }
 
         .loading-bar {
@@ -293,30 +305,35 @@ function updateDialogPosition() {
             flex-grow: 1;
 
             &:hover:not([disabled]) {
-            border: 1px solid rgba(0, 0, 0, 0.4);
-            border-radius: 3px;
+                border: 1px solid rgba(0, 0, 0, 0.4);
+                border-radius: 3px;
             }
 
-            &:active:hover:not([disabled])  {
-            background-color: lightgray;
+            &:active:hover:not([disabled]) {
+                background-color: lightgray;
             }
 
             &[disabled] {
-            filter: grayscale(1);
+                filter: grayscale(1);
             }
 
-            > img {
+            >img {
                 height: 25px;
             }
 
-            &:first-of-type > img {
-            filter: invert(27%) sepia(96%) saturate(2791%) hue-rotate(111deg) brightness(98%) contrast(104%);
+            &:first-of-type>img {
+                filter: invert(27%) sepia(96%) saturate(2791%) hue-rotate(111deg) brightness(98%) contrast(104%);
             }
 
-            &:last-of-type > img {
-            filter: invert(26%) sepia(68%) saturate(7495%) hue-rotate(354deg) brightness(93%) contrast(124%);
+            &:last-of-type>img {
+                filter: invert(26%) sepia(68%) saturate(7495%) hue-rotate(354deg) brightness(93%) contrast(124%);
             }
         }
+    }
+
+    .timestamp {
+        color: darkgray;
+        cursor: pointer;
     }
 }
 </style>
