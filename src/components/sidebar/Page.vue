@@ -32,6 +32,7 @@ function onBack() {
     align-items: center;
     text-align: center;
     padding: 0 15px;
+    padding-left: 30px;
     
     .arrow-back {
         filter: invert(1);
