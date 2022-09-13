@@ -4,6 +4,8 @@
             <PixelDialog 
                 @confirm="onConfirm" 
                 @cancel="onCancel" 
+                @enter="() => fanZoom?.pause()"
+                @leave="() => fanZoom?.resume()"
                 v-bind="store.state.selectedPixel.transform" 
             />
             <Selector />
@@ -61,7 +63,16 @@ function initPanZoom() {
     fanZoom.value = panzoom(board.value, zoomOptions);
     fanZoom.value.on("panstart", clearSelection);
     fanZoom.value.on("zoom", clearSelection);
-    fanZoom.value.on("transform", clearSelection);
+
+    let lastTransform = Object.assign({}, fanZoom.value.getTransform());
+    fanZoom.value.on("transform", () => {
+        if(!fanZoom.value) return;
+        const transform = fanZoom.value.getTransform();
+        if(lastTransform.x != transform.x && lastTransform.y != transform.y && lastTransform.scale != transform.scale) {
+            lastTransform = Object.assign({}, fanZoom.value.getTransform());
+            clearSelection();
+        }
+    })
 
     fanZoom.value.moveTo(
         boardWrapper.value.clientWidth * 0.5 - htmlCanvas.value.clientWidth * fanZoom.value.getTransform().scale * 0.5,

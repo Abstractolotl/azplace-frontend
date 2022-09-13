@@ -1,5 +1,6 @@
 <template>
-    <div ref="dialogWrapper" v-if="owner" class="dialogWrapper">
+    <div ref="dialogWrapper" v-if="owner" class="dialogWrapper"
+    @mouseenter="emit('enter')" @mouseleave="emit('leave')">
 
         <div class="owner-box">
             <div class="img">
@@ -9,19 +10,17 @@
             <div>
                 <span> {{ owner.username }} </span>
                 <span class="timestamp" @click="timestampAsLocalDate = !timestampAsLocalDate"> {{
-                timestampAsLocalDate ? showTimeOfPixelPlacement(owner.timestamp) : convertTimeStamp(owner.timestamp)
-                + " ago"
-                }}
+                timestampAsLocalDate ? showTimeOfPixelPlacement(owner.timestamp) : convertTimeStamp(owner.timestamp) + " ago" }}
                 </span>
             </div>
         </div>
 
         <div v-if="store.state.user" class="confirm-box">
             <button :disabled="isCooldown" type="button" @click="onConfirmation">
-                <img src="@/assets/done.svg">
+                <img draggable="false" src="@/assets/done.svg">
             </button>
             <button type="button" @click="onCancel">
-                <img src="@/assets/close.svg">
+                <img draggable="false" src="@/assets/close.svg">
             </button>
         </div>
 
@@ -50,7 +49,7 @@ const isCooldown = ref<boolean>(false);
 const owner = ref<any>();
 const loadingBarWidth = ref<string>("0%");
 
-const emit = defineEmits(["confirm", "cancel"]);
+const emit = defineEmits(["confirm", "cancel", "enter", "leave"]);
 
 const timestampAsLocalDate = ref<boolean>(false);
 
