@@ -23,6 +23,9 @@
                 <img draggable="false" src="@/assets/close.svg">
             </button>
         </div>
+        <div class="login-reminder" v-else>
+            You need to be logged in to place pixels
+        </div>
 
         <div class="cooldown-box" v-if="isCooldown">
             <img src="@/assets/timer.svg">
@@ -221,6 +224,14 @@ function updateDialogPosition() {
     box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
+
+    .login-reminder {
+        color: red;
+        text-align: center;
+        font-size: 0.9rem;
+        padding: 0 25px;
+        padding-bottom: 5px;
+    }
 
 
     .owner-box {

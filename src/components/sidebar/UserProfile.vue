@@ -17,7 +17,7 @@
         </template>
         <template v-else>
             <img src="@/assets/login.svg"/>
-            <span>Login</span>
+            <span>Login<img src="@/assets/login.svg"/></span>
         </template>
     </div>
 </template>
@@ -148,6 +148,17 @@ $profile-size: 40px;
     &.expanded > img {
         opacity: 0;
         right: 50%;
+    }
+
+    > span {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-right: -25px;
+        > img {
+            filter: invert(1);
+            height: $icon-height;
+        }
     }
 
     > img {
