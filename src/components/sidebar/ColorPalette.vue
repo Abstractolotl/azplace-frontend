@@ -60,7 +60,6 @@ function onScroll(e: Event) {
     } else {
         tileContainer.value.classList.remove("bot");
     }
-    console.log(atTop, atBot)
 }
 
 

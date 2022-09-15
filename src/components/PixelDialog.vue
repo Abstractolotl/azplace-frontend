@@ -1,5 +1,6 @@
 <template>
-    <div ref="dialogWrapper" v-if="owner" class="dialogWrapper">
+    <div ref="dialogWrapper" v-if="owner" class="dialogWrapper"
+    @mouseenter="emit('enter')" @mouseleave="emit('leave')">
 
         <div class="owner-box">
             <div class="img">
@@ -9,20 +10,21 @@
             <div>
                 <span> {{ owner.username }} </span>
                 <span class="timestamp" @click="timestampAsLocalDate = !timestampAsLocalDate"> {{
-                timestampAsLocalDate ? showTimeOfPixelPlacement(owner.timestamp) : convertTimeStamp(owner.timestamp)
-                + " ago"
-                }}
+                timestampAsLocalDate ? showTimeOfPixelPlacement(owner.timestamp) : convertTimeStamp(owner.timestamp) + " ago" }}
                 </span>
             </div>
         </div>
 
         <div v-if="store.state.user" class="confirm-box">
             <button :disabled="isCooldown" type="button" @click="onConfirmation">
-                <img src="@/assets/done.svg">
+                <img draggable="false" src="@/assets/done.svg">
             </button>
             <button type="button" @click="onCancel">
-                <img src="@/assets/close.svg">
+                <img draggable="false" src="@/assets/close.svg">
             </button>
+        </div>
+        <div class="login-reminder" v-else>
+            You need to be logged in to place pixels
         </div>
 
         <div class="cooldown-box" v-if="isCooldown">
@@ -50,7 +52,7 @@ const isCooldown = ref<boolean>(false);
 const owner = ref<any>();
 const loadingBarWidth = ref<string>("0%");
 
-const emit = defineEmits(["confirm", "cancel"]);
+const emit = defineEmits(["confirm", "cancel", "enter", "leave"]);
 
 const timestampAsLocalDate = ref<boolean>(false);
 
@@ -222,6 +224,14 @@ function updateDialogPosition() {
     box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
+
+    .login-reminder {
+        color: red;
+        text-align: center;
+        font-size: 0.9rem;
+        padding: 0 25px;
+        padding-bottom: 5px;
+    }
 
 
     .owner-box {
