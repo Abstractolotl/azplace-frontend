@@ -9,8 +9,8 @@
             </div>
             <div>
                 <span> {{ owner.username }} </span>
-                <span class="timestamp" @click="timestampAsLocalDate = !timestampAsLocalDate"> {{
-                timestampAsLocalDate ? showTimeOfPixelPlacement(owner.timestamp) : convertTimeStamp(owner.timestamp) + " ago" }}
+                <span class="timestamp" @click="timestampAsLocalDate = !timestampAsLocalDate">
+                  {{ pixelTimestamp }}
                 </span>
             </div>
         </div>
@@ -31,7 +31,7 @@
             <img src="@/assets/timer.svg">
             <div>
                 <span> {{ cooldownText }} </span>
-                <div class="loading-bar" :style="'width:' + loadingBarWidth "></div>
+                <div class="loading-bar" :style="loadingDurationStyle"></div>
             </div>
         </div>
 
@@ -40,7 +40,7 @@
 
 
 <script lang="ts" setup>
-import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
 import type { StoreData } from "@/types";
 import AzPlaceAPI from "@/api";
@@ -51,24 +51,24 @@ const cooldownText = ref<string>("");
 const isCooldown = ref<boolean>(false);
 const owner = ref<any>();
 const loadingBarWidth = ref<string>("0%");
+const timestampAsLocalDate = ref<boolean>(false);
+const pixelTimestamp = ref<string>("");
 
 const emit = defineEmits(["confirm", "cancel", "enter", "leave"]);
 
-const timestampAsLocalDate = ref<boolean>(false);
-
 const props = defineProps({
-    x: {
-        type: Number,
-        required: true
-    },
-    y: {
-        type: Number,
-        required: true
-    },
-    pixelSize: {
-        type: Number,
-        required: true
-    }
+  x: {
+    type: Number,
+    required: true
+  },
+  y: {
+    type: Number,
+    required: true
+  },
+  pixelSize: {
+    type: Number,
+    required: true
+  }
 });
 
 const DIALOG_PADDING = 15;
@@ -84,11 +84,22 @@ onMounted(async () => {
     owner.value = pixelOwner;
 
     updateCooldown();
+    updatePixelTimestamp();
     nextTick().then(() => updateDialogPosition())
     intervalFunc = setInterval(() => {
         updateCooldown();
-    }, 1000);
+        updatePixelTimestamp();
+    }, 500);
 })
+
+const loadingDurationStyle = computed(() => {
+  if (!store.state.board) return "";
+  return 'animation-duration: '+ Math.max(0, store.state.board.cooldown - (Date.now() - store.state.lastTimePlaced))/1000 + 's';
+} )
+
+function updatePixelTimestamp() {
+  pixelTimestamp.value = timestampAsLocalDate.value ? showTimeOfPixelPlacement(owner.value.timestamp) : convertTimeStamp(owner.value.timestamp) + " ago"
+}
 
 function convertTimeStamp(time: number) {
     const timestamp = Date.now() - time;
@@ -290,10 +301,22 @@ function updateDialogPosition() {
         }
 
         .loading-bar {
-            width: 100%;
+            width: 0;
             height: 5px;
             background-color: red;
             border-radius: 3px;
+            animation: loading-animation 1s linear;
+        }
+
+        @keyframes loading-animation {
+            0% {
+                background-color:red;
+                width:100%;
+            }
+            100% {
+                background-color:red;
+                width:0;
+            }
         }
 
         > :last-child {
