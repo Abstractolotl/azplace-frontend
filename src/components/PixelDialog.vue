@@ -31,7 +31,7 @@
             <img src="@/assets/timer.svg">
             <div>
                 <span> {{ cooldownText }} </span>
-                <div class="loading-bar" v-bind:style="loadingDurationStyle"></div>
+                <div class="loading-bar" :style="loadingDurationStyle"></div>
             </div>
         </div>
 
@@ -40,7 +40,7 @@
 
 
 <script lang="ts" setup>
-import {computed, nextTick, onMounted, onUnmounted, ref} from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
 import type { StoreData } from "@/types";
 import AzPlaceAPI from "@/api";
