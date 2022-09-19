@@ -139,11 +139,13 @@ onUnmounted(() => {
 
 function onConfirmation() {
     emit("confirm");
+    emit('leave');
     store.state.selectedPixel = null;
 }
 
 function onCancel() {
     emit("cancel");
+    emit('leave');
     store.state.selectedPixel = null;
 }
 
