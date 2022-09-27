@@ -120,7 +120,7 @@ async function loadBoardConfig() {
             return;
         }
 
-        if(!boardConfig.timespan || boardConfig.timespan.started === undefined|| boardConfig.timespan.start_date === undefined || boardConfig.timespan.remaining_time === undefined) {
+        if(!boardConfig.timespan || boardConfig.timespan.started === undefined || boardConfig.timespan.ended === undefined || boardConfig.timespan.start_date === undefined || boardConfig.timespan.remaining_time === undefined) {
             store.dispatch("pushError", { message: "Received bad data from Server"})
             return;
         }
@@ -131,7 +131,8 @@ async function loadBoardConfig() {
             colors: boardConfig.hex_colors,
             cooldown: boardConfig.cooldown,
             startDate: Date.now() + boardConfig.timespan.remaining_time,
-            started: boardConfig.timespan.started
+            started: boardConfig.timespan.started,
+            ended: boardConfig.timespan.ended
         }
 
     } catch (e) {

@@ -31,6 +31,7 @@ export interface Board {
     cooldown: number;
     initialData: CanvasData;
     started: boolean,
+    ended: boolean
     startDate: number
 }
 

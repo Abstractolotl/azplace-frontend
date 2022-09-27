@@ -1,7 +1,7 @@
 <template>
     <Sidebar />
     <template v-if="store.state.board">
-        <LiveBoard v-if="store.state.board.started"/>
+        <LiveBoard v-if="store.state.board.started && !store.state.board.ended"/>
         <BoardLockedPlaceholder v-else />
     </template>
     <BoardLoadingPlaceholder v-else />
