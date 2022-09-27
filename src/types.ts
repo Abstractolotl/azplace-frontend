@@ -32,7 +32,8 @@ export interface Board {
     initialData: CanvasData;
     started: boolean,
     ended: boolean
-    startDate: number
+    startDate: number,
+    endDate: number
 }
 
 export interface CanvasData {

@@ -8,7 +8,7 @@
             <Page v-else-if="store.state.sidebar.panel === 'impressum'" title="Impressum"> <ImpressumPanel /></Page>
             <WelcomePanel v-else />
         </div>
-
+        <BoardInfo v-if="store.state.board"/>
         <DownloadBoard/>
         <FooterPanel />
     </div>
@@ -27,6 +27,7 @@ import Page from "./Page.vue";
 import ImpressumPanel from "./pages/ImpressumPage.vue";
 import ColorPalette from "./ColorPalette.vue";
 import DownloadBoard from "@/components/sidebar/DownloadBoard.vue";
+import BoardInfo from "./pages/BoardInfo.vue";
 
 const store = useStore<StoreData>();
 const sidebar = ref<HTMLElement>();
