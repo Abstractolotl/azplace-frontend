@@ -1,6 +1,6 @@
 <template>
     <div class="board-locked" ref="locked">
-        <template v-if="store.state.board?.started">
+        <template v-if="!store.state.board?.started">
             <span>Board not yet started</span>
             <span>{{ countdown }}</span>
         </template>
