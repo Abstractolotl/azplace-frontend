@@ -17,9 +17,14 @@
     Be mindful of what you draw though, because inappropriate behaviour may be punished. <br /> (even when you're in anonymous mode)
     </span>
 </div>
+<BoardInfo v-if="store.state.board"/>
 </template>
 
 <script lang="ts" setup>
+import { useStore } from "vuex";
+import BoardInfo from "./BoardInfo.vue";
+
+const store = useStore();
 
 </script>
 
@@ -31,10 +36,12 @@
     align-items: center;
     flex-direction: column;
         text-align: center;
+    padding: 0 10px;
 
     > h1 {
         font-size: 32px;
     }
+    margin-bottom: 25px;
 }
 
 </style>

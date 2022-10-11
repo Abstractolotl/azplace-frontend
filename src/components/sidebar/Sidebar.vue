@@ -8,7 +8,6 @@
             <Page v-else-if="store.state.sidebar.panel === 'impressum'" title="Impressum"> <ImpressumPanel /></Page>
             <WelcomePanel v-else />
         </div>
-        <BoardInfo v-if="store.state.board"/>
         <DownloadBoard/>
         <FooterPanel />
     </div>
