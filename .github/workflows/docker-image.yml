@@ -11,8 +11,14 @@ jobs:
     if: ${{ github.event.head_commit.message }} != "automated version patch"
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.TU_PUSH }}
       - name: Install dependencies
         run: npm install
+      - name: GitHub Configuration
+        run: |
+          git config --global user.email "info@ancozockt.de"
+          git config --global user.name "Ancocodet"
       - name: Patch version
         run: VERSION=$(npm version patch -m "automated version patch" --force)
       - name: Push changes
