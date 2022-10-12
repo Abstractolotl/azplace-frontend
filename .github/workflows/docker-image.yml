@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Patch version
-        run: VERSION=$(npm version patch -m "automated version patch")
+        run: VERSION=$(npm version patch -m "automated version patch" --force)
       - name: Push changes
         run: |
           git push
