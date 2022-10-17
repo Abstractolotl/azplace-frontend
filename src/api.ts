@@ -130,8 +130,8 @@ async function loadBoardConfig() {
             height: boardConfig.size.height,
             colors: boardConfig.hex_colors,
             cooldown: boardConfig.cooldown,
-            startDate: Date.now() + boardConfig.timespan.remaining_time,
-            endDate: Date.now() + boardConfig.timespan.remaining_time + boardConfig.timespan.duration,
+            startDate: boardConfig.timespan.start_date,
+            endDate: boardConfig.timespan.start_date + boardConfig.timespan.duration,
             started: boardConfig.timespan.started,
             ended: boardConfig.timespan.ended
         }
