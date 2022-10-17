@@ -1,7 +1,12 @@
 <template>
     <div class="board-locked" ref="locked">
-        <span>Board not yet started</span>
-        <span>{{ countdown }}</span>
+        <template v-if="!store.state.board?.started">
+            <span>Board not yet started</span>
+            <span>{{ countdown }}</span>
+        </template>
+        <template v-if="store.state.board?.ended">
+            <span>Board ended</span>
+        </template>
     </div>
 </template>
 

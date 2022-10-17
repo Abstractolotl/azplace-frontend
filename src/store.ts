@@ -24,7 +24,8 @@ export const store: Store<StoreData> = createStore({
     },
     getters: {
         loggedIn: state => !!state.user,
-        isSelecting: state => !!state.selectedPixel
+        isSelecting: state => !!state.selectedPixel,
+        active: state => state.board.started && !state.board.ended
     },
     mutations: {
     },

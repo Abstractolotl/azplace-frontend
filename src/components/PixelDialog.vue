@@ -5,7 +5,7 @@
         <div class="owner-box">
             <div class="img">
                 <img src="@/assets/default-profile.jpg">
-                <img :src="owner.avatarURL">
+                <img v-if="owner.avatarURL" :src="owner.avatarURL">
             </div>
             <div>
                 <span> {{ owner.username }} </span>
