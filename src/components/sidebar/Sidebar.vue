@@ -121,6 +121,7 @@ const closeNav = () => {
     left: 0;
     background-color: #111;
     overflow: hidden;
+    overflow-y: auto;
     transition: $sidebar-expand-time;
     color: white;
     

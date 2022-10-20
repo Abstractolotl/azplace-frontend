@@ -27,7 +27,6 @@ const store = useStore<StoreData>();
         list-style: none;
         gap: 10px;
         padding: 0 5px;
-        text-align: left;
 
         li {
             line-height: 1.5em;
