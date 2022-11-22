@@ -35,13 +35,17 @@ const store = useStore();
     justify-content: center;
     align-items: center;
     flex-direction: column;
-        text-align: center;
+    text-align: center;
     padding: 0 10px;
+    margin-bottom: 25px;
 
     > h1 {
         font-size: 32px;
     }
-    margin-bottom: 25px;
+
+    > span {
+        overflow-y: auto;
+    }
 }
 
 </style>
