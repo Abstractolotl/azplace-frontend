@@ -136,6 +136,7 @@ const closeNav = () => {
         opacity: 1;
         transition: 0.5s;
         overflow: hidden;
+        overflow-y: auto;
         padding-bottom: 10px;
 
         //position: absolute;
