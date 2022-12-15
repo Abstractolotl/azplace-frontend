@@ -2,7 +2,7 @@
     <div ref="dialogWrapper" v-if="owner" class="dialogWrapper"
     @mouseenter="emit('enter')" @mouseleave="emit('leave')">
 
-        <div class="owner-box">
+        <div v-if="wasPlaced(owner.username)" class="owner-box">
             <div class="img">
                 <img src="@/assets/default-profile.jpg">
                 <img v-if="owner.avatarURL" :src="owner.avatarURL">
@@ -96,6 +96,10 @@ const loadingDurationStyle = computed(() => {
   if (!store.state.board) return "";
   return 'animation-duration: '+ Math.max(0, store.state.board.cooldown - (Date.now() - store.state.lastTimePlaced))/1000 + 's';
 } )
+
+function wasPlaced(owner: string) {
+  return owner != 'unknown';
+}
 
 function updatePixelTimestamp() {
   pixelTimestamp.value = timestampAsLocalDate.value ? showTimeOfPixelPlacement(owner.value.timestamp) : convertTimeStamp(owner.value.timestamp) + " ago"
@@ -242,8 +246,7 @@ function updateDialogPosition() {
         color: red;
         text-align: center;
         font-size: 0.9rem;
-        padding: 0 25px;
-        padding-bottom: 5px;
+        padding: 5px 25px;
     }
 
 
