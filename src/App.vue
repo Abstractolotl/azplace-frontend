@@ -1,4 +1,5 @@
 <template>
+    <ErrorBanner />
     <Sidebar />
     <template v-if="store.state.board">
         <LiveBoard v-if="store.state.board.started && !store.state.board.ended"/>
@@ -12,6 +13,7 @@
 import Sidebar from "./components/sidebar/Sidebar.vue";
 import LiveBoard from "./components/LiveBoard.vue";
 import ErrorOverlay from "./components/error/ErrorOverlay.vue";
+import ErrorBanner from "./components/error/ErrorBanner.vue";
 import { onMounted } from "vue";
 
 import AzPlaceAPI from "@/api";
