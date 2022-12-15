@@ -1,13 +1,21 @@
 <template>
-  <div class="error-banner">
-    <span>Unfortunately there may be problems with our backend at the moment, we are already working on a solution.</span>
+  <div v-if="isEnabled()" class="error-banner">
+    <span>{{ getText() }}</span>
   </div>
 </template>
 
-<script>
-export default {
-  name: "ErrorBanner"
+<script type="ts" setup>
 
+function isEnabled() {
+  return import.meta.env.SHOW_ERROR_BANNER != null;
+}
+
+function getText() {
+  if(import.meta.env.ERROR_BANNER_TEXT == null){
+    return "We are currently making changes there may be disconnections."
+  } else {
+    return import.meta.env.ERROR_BANNER_TEXT;
+  }
 }
 </script>
 
