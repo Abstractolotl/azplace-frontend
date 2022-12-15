@@ -17,7 +17,6 @@ function getText() {
     return import.meta.env.ERROR_BANNER_TEXT;
   }
 }
-
 </script>
 
 <style lang="scss"  scoped>
