@@ -11,7 +11,7 @@ function isEnabled() {
 
 function getText() {
   if(import.meta.env.VITE_ERROR_BANNER_TEXT == undefined){
-    return "We are currently making changes there may be disconnections."
+    return "We are currently making changes there may be disconnections.";
   } else {
     return import.meta.env.VITE_ERROR_BANNER_TEXT;
   }
