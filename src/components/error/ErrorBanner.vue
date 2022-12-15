@@ -5,16 +5,15 @@
 </template>
 
 <script type="ts" setup>
-
 function isEnabled() {
-  return import.meta.env.SHOW_ERROR_BANNER != null;
+  return import.meta.env.VITE_SHOW_ERROR_BANNER != undefined && import.meta.env.VITE_SHOW_ERROR_BANNER == 1;
 }
 
 function getText() {
-  if(import.meta.env.ERROR_BANNER_TEXT == null){
+  if(import.meta.env.VITE_ERROR_BANNER_TEXT == undefined){
     return "We are currently making changes there may be disconnections."
   } else {
-    return import.meta.env.ERROR_BANNER_TEXT;
+    return import.meta.env.VITE_ERROR_BANNER_TEXT;
   }
 }
 </script>
