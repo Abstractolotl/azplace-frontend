@@ -13,6 +13,7 @@ export const store: Store<StoreData> = createStore({
             selectedColorIndex: 0,
             selectedPixel: null,
             user: null,
+            banData: null,
             sidebar: {
                 expanded: false,
                 panel: "",

@@ -8,8 +8,15 @@ export interface StoreData {
         message: string,
         time: number
     }>,
+    banData: BanData | null
     selectedPixel: SelectionInfo | null,
     cachedPixelOwner: Map<String, any>
+}
+
+export interface BanData {
+    userId: number,
+    reason: string | null,
+    time: number | null
 }
 
 export interface SelectionInfo {
@@ -43,7 +50,8 @@ export interface CanvasData {
 export interface User {
     name: string,
     avatarURL: string,
-    anonymous: boolean
+    anonymous: boolean,
+    isAdmin: boolean
 }
 
 export interface Sidebar {

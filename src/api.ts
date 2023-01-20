@@ -67,7 +67,8 @@ async function loadUser() {
         return {
             name: profile.name,
             avatarURL: "https://api.azubi.server.lan/image/personalpicture/" + profile.person_id,
-            anonymous: profile.user_settings.anonymize
+            anonymous: profile.user_settings.anonymize,
+            isAdmin: profile.roles.includes('admin')
         }
 
     } catch (e) {
@@ -165,6 +166,7 @@ async function requestPixel(x: number, y: number) {
 
         return {
             anonym: anonymous,
+            userId: pixelInfo.user_id,
             username: pixelInfo.username,
             timestamp: pixelInfo.timestamp,
             avatarURL: !anonymous ? "https://api.azubi.server.lan/image/personalpicture/" + pixelInfo.person_id : null
@@ -238,6 +240,29 @@ async function changeSettings(anonymous: boolean) {
     }
 }
 
+async function banUser(userId: number, reason: string, time: number){
+    const endpoint = BASE_URL + "/punishment/ban";
+
+    try {
+        const response = await fetch(endpoint, {
+            ...DEFAULT_REQUEST_HEADERS,
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                reason: reason,
+                user_id: userId,
+                time: time
+            })
+        })
+        if(!response.ok) throw response;
+    } catch (e) {
+        store.dispatch("pushError", { message: "User cannot be banned"})
+    }
+}
+
 export default {
     doLogin,
     doLogout,
@@ -246,5 +271,6 @@ export default {
     loadUser,
     setLiveUpdateHandler,
     requestPixel,
-    changeSettings
+    changeSettings,
+    banUser
 }

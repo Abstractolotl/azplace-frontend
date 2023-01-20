@@ -1,8 +1,9 @@
 <template>
     <div ref="boardWrapper" class="board-wrapper">
+        <BanDialog v-if="store.state.banData"/>
         <template v-if="store.state.selectedPixel">
-            <PixelDialog 
-                @confirm="onConfirm" 
+            <PixelDialog
+                @confirm="onConfirm"
                 @cancel="onCancel" 
                 @enter="() => fanZoom?.pause()"
                 @leave="() => fanZoom?.resume()"
@@ -25,6 +26,7 @@ import panzoom, { type PanZoom } from "panzoom";
 import AzPlaceAPI from "@/api";
 import PixelDialog from "./PixelDialog.vue";
 import Selector from "./Selector.vue";
+import BanDialog from "@/components/BanDialog.vue";
 
 const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
