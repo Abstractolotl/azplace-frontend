@@ -15,6 +15,12 @@
             </div>
         </div>
 
+        <div v-if="wasPlaced(owner.username) && canBan()" class="ban-box">
+          <button type="button" @click="startBanProcess()">
+            <img draggable="false" src="@/assets/gavel.svg" alt="Ban Hammer">
+          </button>
+        </div>
+
         <div v-if="store.state.user" class="confirm-box">
             <button :disabled="isCooldown" type="button" @click="onConfirmation">
                 <img draggable="false" src="@/assets/done.svg">
@@ -96,6 +102,20 @@ const loadingDurationStyle = computed(() => {
   if (!store.state.board) return "";
   return 'animation-duration: '+ Math.max(0, store.state.board.cooldown - (Date.now() - store.state.lastTimePlaced))/1000 + 's';
 } )
+
+function startBanProcess() {
+  store.state.banData = {
+    userId: owner.value.userId,
+    reason: null,
+    time: null
+  }
+  store.state.selectedPixel = null;
+}
+
+function canBan() {
+  return store.getters.loggedIn
+      && store.state.user!.isAdmin;
+}
 
 function wasPlaced(owner: string) {
   return owner != 'unknown';
@@ -208,23 +228,6 @@ function updateDialogPosition() {
     }
     dialogWrapper.value.style.left = selectorCenterX + left + "px";
     dialogWrapper.value.style.top = selectorCenterY + "px";
-    /*
-      // left right
-      if (x + pixelSize + dialogWidth + DIALOG_PADDING*2 < boardWidth) {// left
-        dialogWrapper.value.style.left = (x + pixelSize + DIALOG_PADDING) + "px";
-      } else {                                                          // right
-        dialogWrapper.value.style.left = (x - dialogWidth - DIALOG_PADDING) + "px";
-      }
-  
-      // top bottom
-      if (selectorCenterY - (dialogHeight / 2) < 0) {                   // top
-        dialogWrapper.value.style.top = DIALOG_PADDING + "px";
-      } else if (selectorCenterY + (dialogHeight / 2) > boardHeight) {  // bottom
-        dialogWrapper.value.style.top = (boardHeight - dialogHeight - DIALOG_PADDING) + "px";
-      } else {
-        dialogWrapper.value.style.top = (selectorCenterY - (dialogHeight / 2)) + "px";   // default
-      }
-      */
 }
 
 </script>
@@ -281,6 +284,44 @@ function updateDialogPosition() {
             font-size: 14px;
         }
 
+    }
+
+    .ban-box {
+        display: flex;
+        padding: 5px 0px;
+        gap: 5px;
+        align-items: center;
+
+      button {
+        color: black;
+        text-align: center;
+        outline: none;
+        background-color: #00000000;
+        border: 1px solid rgba(0, 0, 0, 0);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
+
+        font-weight: bold;
+
+        >img {
+          height: 20px;
+        }
+
+        &:hover:not([disabled]) {
+          border: 1px solid rgba(0, 0, 0, 0.4);
+          border-radius: 3px;
+        }
+
+        &:active:hover:not([disabled]) {
+          background-color: lightgray;
+        }
+
+        &[disabled] {
+          filter: grayscale(1);
+        }
+      }
     }
 
     >.cooldown-box {
