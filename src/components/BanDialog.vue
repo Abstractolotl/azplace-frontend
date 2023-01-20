@@ -78,7 +78,7 @@ function filledIn(){
 
 function performBan(){
   store.state.banData!.reason = reason.value!;
-  store.state.banData!.time = timeSelect.value ? 0 : timeAmount.value * timeTypes[timeType.value];
+  store.state.banData!.time = timeSelect.value ? -1 : timeAmount.value * timeTypes[timeType.value];
 
   AzPlaceAPI.banUser(store.state.banData!.userId, store.state.banData!.reason, store.state.banData!.time)
   store.state.banData = null;
