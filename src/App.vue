@@ -2,7 +2,7 @@
     <ErrorBanner />
     <Sidebar />
     <template v-if="store.state.board">
-        <LiveBoard v-if="store.state.board.started && !store.state.board.ended"/>
+        <LiveBoard v-if="store.state.board.started" :locked="store.state.board.ended"/>
         <BoardLockedPlaceholder v-else />
     </template>
     <BoardLoadingPlaceholder v-else />

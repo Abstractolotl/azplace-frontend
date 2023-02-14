@@ -21,17 +21,19 @@
           </button>
         </div>
 
-        <div v-if="store.state.user" class="confirm-box">
-            <button :disabled="isCooldown" type="button" @click="onConfirmation">
-                <img draggable="false" src="@/assets/done.svg">
-            </button>
-            <button type="button" @click="onCancel">
-                <img draggable="false" src="@/assets/close.svg">
-            </button>
-        </div>
-        <div class="login-reminder" v-else>
-            You need to be logged in to place pixels
-        </div>
+        <template v-if="!locked">
+            <div v-if="store.state.user" class="confirm-box">
+                <button :disabled="isCooldown" type="button" @click="onConfirmation">
+                    <img draggable="false" src="@/assets/done.svg">
+                </button>
+                <button type="button" @click="onCancel">
+                    <img draggable="false" src="@/assets/close.svg">
+                </button>
+            </div>
+            <div class="login-reminder" v-else>
+                You need to be logged in to place pixels
+            </div>
+        </template>
 
         <div class="cooldown-box" v-if="isCooldown">
             <img src="@/assets/timer.svg">
@@ -74,7 +76,8 @@ const props = defineProps({
   pixelSize: {
     type: Number,
     required: true
-  }
+  },
+  locked: Boolean
 });
 
 const DIALOG_PADDING = 15;
