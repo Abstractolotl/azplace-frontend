@@ -2,7 +2,7 @@ import { useStore } from "vuex";
 import { store } from "./store";
 import type { Board, StoreData } from "./types";
 
-const BASE_URL = "https://api.azplace.azubi.server.lan";
+const BASE_URL = "https://api.pixels.abstractolotl.de";
 
 const params = new URLSearchParams(window.location.search);
 const DEFAULT_BOARD_ID = params.has("board") ? params.get("board") : 1;
@@ -16,7 +16,7 @@ let socket: WebSocket | null;
 let attempts = 0;
 
 function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, color_index: number}) => void) {
-    socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
+    socket = new WebSocket("wss://pixels.abstractolotl.de/ws");
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
