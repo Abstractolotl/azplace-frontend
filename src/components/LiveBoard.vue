@@ -1,8 +1,10 @@
 <template>
     <div ref="boardWrapper" class="board-wrapper">
+        <BanDialog v-if="store.state.banData"/>
         <template v-if="store.state.selectedPixel">
-            <PixelDialog 
-                @confirm="onConfirm" 
+            <PixelDialog
+                :locked="locked"
+                @confirm="onConfirm"
                 @cancel="onCancel" 
                 @enter="() => fanZoom?.pause()"
                 @leave="() => fanZoom?.resume()"
@@ -11,6 +13,8 @@
             <Selector />
         </template>
         <div ref="board" class="board" @mousedown="onMouseDown" @mouseup="onMouseUp">
+
+            <div style="text-align: left; color: red; position: absolute; transform: translateY(-100%);">Board ended</div>
             <canvas v-if="store.state.board" ref="htmlCanvas"></canvas>
         </div>
     </div>
@@ -18,13 +22,14 @@
 
 <script setup lang="ts">
 
-import type { Board, CanvasData, StoreData, User } from "@/types";
-import { nextTick, onMounted, ref, watch } from "vue";
+import type { CanvasData, StoreData, User } from "@/types";
+import { onMounted, ref } from "vue";
 import { Store, useStore } from "vuex";
 import panzoom, { type PanZoom } from "panzoom";
 import AzPlaceAPI from "@/api";
 import PixelDialog from "./PixelDialog.vue";
 import Selector from "./Selector.vue";
+import BanDialog from "@/components/BanDialog.vue";
 
 const store: Store<StoreData> = useStore();
 const htmlCanvas = ref<HTMLCanvasElement>();
@@ -34,9 +39,13 @@ const fanZoom = ref<PanZoom>();
 const mouseDownPos = ref({ x: 0, y: 0 })
 
 const MIN_ZOOM_SELECT = 10;
-const MIN_ZOOM = 5;
+const MIN_ZOOM = 4;
 const MAX_ZOOM = 140;
 const MAX_MOUSE_MOVE = 50; // distance the mouse can be moved while selecting a tile
+
+defineProps({
+    locked: Boolean
+})
 
 onMounted(async () => {
     clearSelection();

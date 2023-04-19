@@ -2,7 +2,7 @@ import { useStore } from "vuex";
 import { store } from "./store";
 import type { Board, StoreData } from "./types";
 
-const BASE_URL = "https://api.azplace.azubi.server.lan";
+const BASE_URL = "https://api.pixels.abstractolotl.de";
 
 const params = new URLSearchParams(window.location.search);
 const DEFAULT_BOARD_ID = params.has("board") ? params.get("board") : 1;
@@ -16,7 +16,7 @@ let socket: WebSocket | null;
 let attempts = 0;
 
 function setLiveUpdateHandler(handler: ({x,y,color_index}:{x: number, y:number, color_index: number}) => void) {
-    socket = new WebSocket("wss://azplace.azubi.server.lan/ws");
+    socket = new WebSocket("wss://pixels.abstractolotl.de/ws");
 
     socket.addEventListener("message", (e) => {
         attempts = 0;
@@ -67,7 +67,8 @@ async function loadUser() {
         return {
             name: profile.name,
             avatarURL: "https://api.azubi.server.lan/image/personalpicture/" + profile.person_id,
-            anonymous: profile.user_settings.anonymize
+            anonymous: profile.user_settings.anonymize,
+            isAdmin: profile.roles.includes('admin')
         }
 
     } catch (e) {
@@ -165,6 +166,7 @@ async function requestPixel(x: number, y: number) {
 
         return {
             anonym: anonymous,
+            userId: pixelInfo.user_id,
             username: pixelInfo.username,
             timestamp: pixelInfo.timestamp,
             avatarURL: !anonymous ? "https://api.azubi.server.lan/image/personalpicture/" + pixelInfo.person_id : null
@@ -238,6 +240,29 @@ async function changeSettings(anonymous: boolean) {
     }
 }
 
+async function banUser(userId: number, reason: string, time: number){
+    const endpoint = BASE_URL + "/punishment/ban";
+
+    try {
+        const response = await fetch(endpoint, {
+            ...DEFAULT_REQUEST_HEADERS,
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                reason: reason,
+                user_id: userId,
+                time: time
+            })
+        })
+        if(!response.ok) throw response;
+    } catch (e) {
+        store.dispatch("pushError", { message: "User cannot be banned"})
+    }
+}
+
 export default {
     doLogin,
     doLogout,
@@ -246,5 +271,6 @@ export default {
     loadUser,
     setLiveUpdateHandler,
     requestPixel,
-    changeSettings
+    changeSettings,
+    banUser
 }
