@@ -66,7 +66,7 @@ async function loadUser() {
 
         return {
             name: profile.name,
-            avatarURL: "https://api.azubi.server.lan/image/personalpicture/" + profile.person_id,
+            avatarURL: null,
             anonymous: profile.user_settings.anonymize,
             isAdmin: profile.roles.includes('admin')
         }
