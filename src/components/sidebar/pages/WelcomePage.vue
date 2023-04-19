@@ -9,7 +9,7 @@
     Inspired by Reddit's <i>r/Place</i> we created our own version: <strong>az/Place</strong>. <br /> <br />
 
     Want to know how az/Place works? You can checkout the project on <a href="https://github.com/Abstractolotl/">GitHub</a>,
-    see the <a href="https://api.azplace.azubi.server.lan/swagger-ui/index.html">SwaggerUi</a> or <a href="#">ask us</a> directly! <br /> <br />
+    see the <a href="https://api.pixels.abstractolotl.de/swagger-ui/index.html">SwaggerUi</a> or <a href="#">ask us</a> directly! <br /> <br />
     Have fun creating beautiful art by yourself, with your coworker or mess with the art of your colleagues.
 
     If you run into any troubles please let us know by clicking the link at the very bottom. <br />

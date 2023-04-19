@@ -1,17 +1,16 @@
 <template>
     <div class="aboutus">
         Meet the group of talented Apprentices that worked hard to bring this Project to life <br />
-        If you want to know more about the creation process, don't be afraid to get in contact with us 
-        
+        If you want to know more about the creation process, don't be afraid to get in contact with us
+
         <div>
-            <a href="https://united-internet.org/profiles/people/21550081"><img src="https://api.azubi.server.lan/image/personalpicture/21550081"/></a>
-            <a href="https://united-internet.org/profiles/people/21549706"><img src="https://api.azubi.server.lan/image/personalpicture/21549706"/></a>
-            <a href="https://united-internet.org/profiles/people/21566957"><img src="https://api.azubi.server.lan/image/personalpicture/21566957"/></a>
-            <a href="https://united-internet.org/profiles/people/21549699"><img src="https://api.azubi.server.lan/image/personalpicture/21549699"/></a>
-            <a href="https://united-internet.org/profiles/people/21549701"><img src="https://api.azubi.server.lan/image/personalpicture/21549701"/></a>
-            <a href="https://united-internet.org/profiles/people/21549705"><img src="https://api.azubi.server.lan/image/personalpicture/21549705"/></a>
-            <a href="https://united-internet.org/profiles/people/21549708"><img src="https://api.azubi.server.lan/image/personalpicture/21549708"/></a>
-            <a href="https://united-internet.org/profiles/people/21549700"><img src="https://api.azubi.server.lan/image/personalpicture/21549700"/></a>
+            <a href="https://github.com/Arekkus"><img src="https://avatars.githubusercontent.com/u/74536331"/></a>
+            <a href="https://github.com/jonasrdl"><img src="https://avatars.githubusercontent.com/u/76961402"/></a>
+            <a href="https://github.com/jonas-be"><img src="https://avatars.githubusercontent.com/u/90411737"/></a>
+            <a href="https://github.com/Drumna"><img src="https://avatars.githubusercontent.com/u/47066135"/></a>
+            <a href="https://github.com/NouCake"><img src="https://avatars.githubusercontent.com/u/25909346"/></a>
+            <a href="https://github.com/lucasl0st"><img src="https://avatars.githubusercontent.com/u/17984007"/></a>
+            <a href="https://github.com/Ancocodet"><img src="https://avatars.githubusercontent.com/u/90411737"/></a>
         </div>
     </div>
 </template>
