@@ -10,7 +10,7 @@
             <a href="https://github.com/Drumna"><img src="https://avatars.githubusercontent.com/u/47066135"/></a>
             <a href="https://github.com/NouCake"><img src="https://avatars.githubusercontent.com/u/25909346"/></a>
             <a href="https://github.com/lucasl0st"><img src="https://avatars.githubusercontent.com/u/17984007"/></a>
-            <a href="https://github.com/Ancocodet"><img src="https://avatars.githubusercontent.com/u/90411737"/></a>
+            <a href="https://github.com/Ancocodet"><img src="https://avatars.githubusercontent.com/u/32819952"/></a>
         </div>
     </div>
 </template>
