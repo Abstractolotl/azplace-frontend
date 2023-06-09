@@ -13,8 +13,6 @@
             <Selector />
         </template>
         <div ref="board" class="board" @mousedown="onMouseDown" @mouseup="onMouseUp">
-
-            <div style="text-align: left; color: red; position: absolute; transform: translateY(-100%);">Board ended</div>
             <canvas v-if="store.state.board" ref="htmlCanvas"></canvas>
         </div>
     </div>
